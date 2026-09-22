@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   MessageSquare,
   Sparkles,
@@ -13,14 +14,19 @@ import {
   GraduationCap,
   FileSpreadsheet,
   Layers,
-  ChevronDown
+  ChevronDown,
+  ExternalLink,
+  Menu,
+  X
 } from 'lucide-react';
 import { Button } from '../components/common/Button.jsx';
 import { Badge } from '../components/common/Badge.jsx';
+import { ConfirmDialog } from '../components/common/ConfirmDialog.jsx';
 import { useSpace } from '../context/SpaceContext.jsx';
 import api from '../api/client.js';
 
 export function ChatPage() {
+  const navigate = useNavigate();
   const { currentSpace } = useSpace();
   const [conversations, setConversations] = useState([]);
   const [activeConvId, setActiveConvId] = useState(null);
@@ -29,6 +35,9 @@ export function ChatPage() {
   const [activeMode, setActiveMode] = useState('ask');
   const [loading, setLoading] = useState(false);
   const [copiedIdx, setCopiedIdx] = useState(null);
+  const [deleteConvId, setDeleteConvId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
   const messagesEndRef = useRef(null);
 
@@ -126,25 +135,71 @@ export function ChatPage() {
     }
   };
 
-  const handleDeleteConv = async (e, convId) => {
+  const handlePromptDelete = (e, convId) => {
     e.stopPropagation();
-    if (confirm('Delete this conversation?')) {
-      try {
-        await api.delete(`/chat/conversations/${convId}`);
-        if (activeConvId === convId) {
-          setActiveConvId(null);
-          setMessages([]);
-        }
-        fetchConversations();
-      } catch (err) {
-        console.error(err);
+    setDeleteConvId(convId);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConvId) return;
+    setIsDeleting(true);
+    try {
+      await api.delete(`/chat/conversations/${deleteConvId}`);
+      if (activeConvId === deleteConvId) {
+        setActiveConvId(null);
+        setMessages([]);
       }
+      setDeleteConvId(null);
+      await fetchConversations();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
+  const renderConversationItem = (conv) => {
+    const isSelected = (conv._id || conv.id) === activeConvId;
+    return (
+      <div
+        key={conv._id || conv.id}
+        onClick={() => {
+          selectConversation(conv._id || conv.id);
+          setShowMobileSidebar(false);
+        }}
+        className={`p-2.5 rounded-lg text-xs cursor-pointer flex items-center justify-between transition group ${
+          isSelected
+            ? 'bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 font-medium'
+            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+        }`}
+      >
+        <div className="flex items-center gap-2 truncate">
+          <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate">{conv.title}</span>
+        </div>
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+          <button
+            onClick={(e) => handleTogglePin(e, conv._id || conv.id)}
+            className={`p-1 hover:text-brand-600 ${conv.isPinned ? 'opacity-100 text-brand-600' : ''}`}
+            title="Pin conversation"
+          >
+            <Pin className="w-3 h-3" />
+          </button>
+          <button
+            onClick={(e) => handlePromptDelete(e, conv._id || conv.id)}
+            className="p-1 hover:text-rose-600"
+            title="Delete conversation"
+          >
+            <Trash2 className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="h-[calc(100vh-6rem)] -m-4 sm:-m-6 lg:-m-8 flex overflow-hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
-      {/* Left Sidebar: Conversations list */}
+    <div className="relative h-[calc(100vh-6rem)] -m-4 sm:-m-6 lg:-m-8 flex overflow-hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+      {/* Desktop Left Sidebar: Conversations list */}
       <div className="w-64 border-r border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/90 flex flex-col shrink-0 hidden md:flex">
         <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -167,49 +222,63 @@ export function ChatPage() {
               No conversations yet in this space.
             </div>
           ) : (
-            conversations.map((conv) => {
-              const isSelected = (conv._id || conv.id) === activeConvId;
-              return (
-                <div
-                  key={conv._id || conv.id}
-                  onClick={() => selectConversation(conv._id || conv.id)}
-                  className={`p-2.5 rounded-lg text-xs cursor-pointer flex items-center justify-between transition group ${
-                    isSelected
-                      ? 'bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 font-medium'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    <MessageSquare className="w-3.5 h-3.5 shrink-0" />
-                    <span className="truncate">{conv.title}</span>
-                  </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-                    <button
-                      onClick={(e) => handleTogglePin(e, conv._id || conv.id)}
-                      className={`p-1 hover:text-brand-600 ${conv.isPinned ? 'opacity-100 text-brand-600' : ''}`}
-                      title="Pin conversation"
-                    >
-                      <Pin className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={(e) => handleDeleteConv(e, conv._id || conv.id)}
-                      className="p-1 hover:text-rose-600"
-                      title="Delete conversation"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })
+            conversations.map(renderConversationItem)
           )}
         </div>
       </div>
 
+      {/* Mobile Drawer Backdrop & Drawer */}
+      {showMobileSidebar && (
+        <div className="fixed inset-0 z-40 md:hidden bg-slate-900/50 backdrop-blur-xs flex">
+          <div className="w-72 bg-white dark:bg-slate-900 h-full flex flex-col shadow-xl z-50 border-r border-slate-200 dark:border-slate-800">
+            <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Conversations
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setActiveConvId(null);
+                    setMessages([]);
+                    setShowMobileSidebar(false);
+                  }}
+                  className="text-xs px-2 py-1 rounded bg-brand-50 text-brand-600 font-medium"
+                >
+                  + New Chat
+                </button>
+                <button
+                  onClick={() => setShowMobileSidebar(false)}
+                  className="p-1 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2 space-y-1">
+              {conversations.length === 0 ? (
+                <div className="py-8 text-center text-xs text-slate-400">
+                  No conversations yet in this space.
+                </div>
+              ) : (
+                conversations.map(renderConversationItem)
+              )}
+            </div>
+          </div>
+          <div className="flex-1" onClick={() => setShowMobileSidebar(false)} />
+        </div>
+      )}
+
       {/* Main Chat Interface */}
       <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-slate-900">
-        {/* Mode Selector Strip */}
-        <div className="px-4 py-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-1.5 overflow-x-auto shrink-0 bg-slate-50/50 dark:bg-slate-850/40">
+        {/* Mode Selector Strip + Mobile Menu Button */}
+        <div className="px-3 sm:px-4 py-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-1.5 overflow-x-auto shrink-0 bg-slate-50/50 dark:bg-slate-850/40">
+          <button
+            onClick={() => setShowMobileSidebar(true)}
+            className="md:hidden p-1.5 rounded-lg border border-slate-200 dark:border-slate-750 text-slate-600 dark:text-slate-300 hover:bg-slate-100 shrink-0 mr-1"
+            title="Open Conversations"
+          >
+            <Menu className="w-4 h-4" />
+          </button>
           <span className="text-[11px] font-semibold text-slate-400 mr-2 uppercase tracking-wider hidden sm:inline">
             AI Mode:
           </span>
@@ -307,10 +376,20 @@ export function ChatPage() {
                         {msg.citations.map((c, cIdx) => (
                           <div
                             key={cIdx}
-                            className="p-2.5 rounded-lg bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 text-[11px]"
+                            onClick={() => {
+                              if (c.documentId) {
+                                navigate(`/app/documents/${c.documentId}`);
+                              }
+                            }}
+                            className={`p-2.5 rounded-lg bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 text-[11px] transition ${
+                              c.documentId ? 'cursor-pointer hover:border-brand-500 hover:shadow-xs group' : ''
+                            }`}
                           >
-                            <div className="font-semibold text-brand-600 dark:text-brand-400 truncate">
-                              {c.documentTitle}
+                            <div className="flex items-center justify-between font-semibold text-brand-600 dark:text-brand-400 truncate">
+                              <span className="truncate">{c.documentTitle}</span>
+                              {c.documentId && (
+                                <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition shrink-0 ml-1 text-brand-500" />
+                              )}
                             </div>
                             <div className="text-slate-400 text-[10px]">
                               Page {c.pageNumber} • {c.sectionTitle}
@@ -378,6 +457,17 @@ export function ChatPage() {
           </form>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteConvId)}
+        onClose={() => setDeleteConvId(null)}
+        onConfirm={handleConfirmDelete}
+        isLoading={isDeleting}
+        title="Delete Conversation"
+        description="Are you sure you want to delete this chat conversation? All message history will be permanently deleted."
+        confirmText="Delete Conversation"
+        variant="danger"
+      />
     </div>
   );
 }

@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
-import { Settings, User, Brain, CreditCard, Shield, Check, Save } from 'lucide-react';
+import { Settings, User, Brain, CreditCard, Shield, Check, Save, AlertCircle, Sparkles, CheckCircle2 } from 'lucide-react';
 import { Button } from '../components/common/Button.jsx';
 import { Badge } from '../components/common/Badge.jsx';
+import { Modal } from '../components/common/Modal.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useSpace } from '../context/SpaceContext.jsx';
 import api from '../api/client.js';
 
 export function SettingsPage() {
   const { user, updateUser } = useAuth();
+  const { spaces } = useSpace();
   const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'memory' | 'billing'
 
   // Profile form
   const [name, setName] = useState(user?.name || '');
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [profileMsg, setProfileMsg] = useState('');
+  const [profileError, setProfileError] = useState('');
 
   // AI Memory form
   const [language, setLanguage] = useState(user?.memoryPreferences?.language || 'English');
@@ -20,18 +24,23 @@ export function SettingsPage() {
   const [customInstructions, setCustomInstructions] = useState(user?.memoryPreferences?.customInstructions || '');
   const [isSavingMemory, setIsSavingMemory] = useState(false);
   const [memoryMsg, setMemoryMsg] = useState('');
+  const [memoryError, setMemoryError] = useState('');
+
+  // Plan info modal
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     setIsSavingProfile(true);
     setProfileMsg('');
+    setProfileError('');
     try {
       const res = await api.patch('/auth/profile', { name });
       updateUser(res.user);
       setProfileMsg('Profile updated successfully.');
       setTimeout(() => setProfileMsg(''), 3000);
     } catch (err) {
-      alert(err.message || 'Failed to update profile');
+      setProfileError(err.message || 'Failed to update profile.');
     } finally {
       setIsSavingProfile(false);
     }
@@ -41,6 +50,7 @@ export function SettingsPage() {
     e.preventDefault();
     setIsSavingMemory(true);
     setMemoryMsg('');
+    setMemoryError('');
     try {
       const res = await api.patch('/auth/memory', {
         language,
@@ -48,14 +58,30 @@ export function SettingsPage() {
         customInstructions
       });
       updateUser({ memoryPreferences: res.memoryPreferences });
-      setMemoryMsg('AI memory and preferences updated.');
+      setMemoryMsg('AI memory and personalization preferences updated.');
       setTimeout(() => setMemoryMsg(''), 3000);
     } catch (err) {
-      alert(err.message || 'Failed to update memory');
+      setMemoryError(err.message || 'Failed to update memory.');
     } finally {
       setIsSavingMemory(false);
     }
   };
+
+  // Real data calculations
+  const storageUsedMB = Math.round((user?.storageUsedBytes || 0) / (1024 * 1024));
+  const storageLimitMB = Math.round((user?.storageLimitBytes || 2 * 1024 * 1024 * 1024) / (1024 * 1024));
+  const queriesUsed = user?.aiQueryCount || 0;
+  const queriesLimit = user?.aiQueryLimit || 500;
+  const queriesRemaining = Math.max(0, queriesLimit - queriesUsed);
+
+  // Compute total unique members across user spaces
+  const memberEmails = new Set();
+  spaces.forEach(s => {
+    s.members?.forEach(m => {
+      if (m.email) memberEmails.add(m.email.toLowerCase());
+    });
+  });
+  const totalCollaborators = Math.max(1, memberEmails.size);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -64,7 +90,7 @@ export function SettingsPage() {
           <Settings className="w-5 h-5 text-slate-600" /> Account & Preferences
         </h1>
         <p className="text-xs text-slate-500 mt-1">
-          Manage your profile, AI memory preferences, and subscription tier.
+          Manage your personal profile, AI memory preferences, and subscription tier.
         </p>
       </div>
 
@@ -96,6 +122,21 @@ export function SettingsPage() {
           <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
             Personal Information
           </h2>
+
+          {profileError && (
+            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 flex items-center gap-2 text-xs text-rose-700 dark:text-rose-300">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{profileError}</span>
+            </div>
+          )}
+
+          {profileMsg && (
+            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300">
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <span>{profileMsg}</span>
+            </div>
+          )}
+
           <form onSubmit={handleSaveProfile} className="space-y-4 max-w-md">
             <div>
               <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
@@ -103,14 +144,15 @@ export function SettingsPage() {
               </label>
               <input
                 type="text"
+                required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+                className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-750 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none"
               />
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Email Address
+                Email Address (Primary Identity)
               </label>
               <input
                 type="email"
@@ -119,12 +161,6 @@ export function SettingsPage() {
                 className="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-850 text-slate-500 px-3 py-2 cursor-not-allowed"
               />
             </div>
-
-            {profileMsg && (
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                {profileMsg}
-              </p>
-            )}
 
             <Button size="sm" type="submit" isLoading={isSavingProfile} icon={Save}>
               Save Changes
@@ -141,9 +177,23 @@ export function SettingsPage() {
               AI Memory & Personalization Directive
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Customize how DocuMind AI synthesizes answers across your documents.
+              Customize how DocuMind AI synthesizes answers and cites documentation across all spaces.
             </p>
           </div>
+
+          {memoryError && (
+            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 flex items-center gap-2 text-xs text-rose-700 dark:text-rose-300">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{memoryError}</span>
+            </div>
+          )}
+
+          {memoryMsg && (
+            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300">
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <span>{memoryMsg}</span>
+            </div>
+          )}
 
           <form onSubmit={handleSaveMemory} className="space-y-4 max-w-lg">
             <div>
@@ -153,7 +203,7 @@ export function SettingsPage() {
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+                className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-750 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none"
               >
                 <option value="English">English</option>
                 <option value="Hindi">Hindi (हिन्दी)</option>
@@ -170,7 +220,7 @@ export function SettingsPage() {
                 value={tone}
                 onChange={(e) => setTone(e.target.value)}
                 placeholder="e.g. concise and practical, or deeply academic"
-                className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+                className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-750 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none"
               />
             </div>
 
@@ -183,15 +233,9 @@ export function SettingsPage() {
                 value={customInstructions}
                 onChange={(e) => setCustomInstructions(e.target.value)}
                 placeholder="e.g. Always format complex definitions as bullet points and cite exact page numbers."
-                className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+                className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-750 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none resize-none"
               />
             </div>
-
-            {memoryMsg && (
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                {memoryMsg}
-              </p>
-            )}
 
             <Button size="sm" type="submit" isLoading={isSavingMemory} icon={Save}>
               Save Memory Preferences
@@ -203,42 +247,80 @@ export function SettingsPage() {
       {/* Billing & Quota Tab */}
       {activeTab === 'billing' && (
         <div className="space-y-6">
-          <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between">
+          <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                  Current Plan: {user?.plan?.toUpperCase() || 'PRO'}
+                  Current Tier: {user?.plan?.toUpperCase() || 'PRO'}
                 </h2>
                 <Badge variant="success" size="xs">Active</Badge>
               </div>
               <p className="text-xs text-slate-500 mt-1">
-                Next billing date: October 21, 2026 • Renews automatically.
+                Includes hybrid RAG indexing, high-dimensional vector search, and priority LLM fallbacks.
               </p>
             </div>
-            <Button size="sm" variant="outline">
-              Manage Invoices
+            <Button size="sm" variant="outline" onClick={() => setIsPlanModalOpen(true)}>
+              Plan Details & Limits
             </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2">
               <span className="text-xs font-semibold text-slate-400 uppercase">AI Queries</span>
-              <div className="text-2xl font-bold">{user?.aiQueryCount || 38} / {user?.aiQueryLimit || 500}</div>
-              <p className="text-[11px] text-slate-500">462 questions remaining this period.</p>
+              <div className="text-2xl font-bold">{queriesUsed} / {queriesLimit}</div>
+              <p className="text-[11px] text-slate-500">{queriesRemaining} questions remaining in this cycle.</p>
             </div>
             <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2">
               <span className="text-xs font-semibold text-slate-400 uppercase">Cloud Storage</span>
-              <div className="text-2xl font-bold">{Math.round((user?.storageUsedBytes || 48 * 1024 * 1024) / (1024 * 1024))} MB</div>
-              <p className="text-[11px] text-slate-500">Of 2,048 MB total capacity.</p>
+              <div className="text-2xl font-bold">{storageUsedMB} MB</div>
+              <p className="text-[11px] text-slate-500">Of {storageLimitMB} MB allocated storage.</p>
             </div>
             <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2">
-              <span className="text-xs font-semibold text-slate-400 uppercase">Team Members</span>
-              <div className="text-2xl font-bold">3 / 10</div>
-              <p className="text-[11px] text-slate-500">7 additional collaborator seats available.</p>
+              <span className="text-xs font-semibold text-slate-400 uppercase">Active Collaborators</span>
+              <div className="text-2xl font-bold">{totalCollaborators}</div>
+              <p className="text-[11px] text-slate-500">Members across your knowledge spaces.</p>
             </div>
           </div>
         </div>
       )}
+
+      {/* Plan Details Modal */}
+      <Modal
+        isOpen={isPlanModalOpen}
+        onClose={() => setIsPlanModalOpen(false)}
+        title="Pro Plan Overview"
+        description="Your subscription parameters and guaranteed SLA."
+      >
+        <div className="space-y-4 text-xs">
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-750 space-y-2">
+            <div className="flex justify-between font-medium">
+              <span>Knowledge Spaces</span>
+              <strong className="text-slate-800 dark:text-slate-200">Unlimited</strong>
+            </div>
+            <div className="flex justify-between font-medium">
+              <span>Storage Allocation</span>
+              <strong className="text-slate-800 dark:text-slate-200">2,048 MB (2 GB)</strong>
+            </div>
+            <div className="flex justify-between font-medium">
+              <span>Max Document Size</span>
+              <strong className="text-slate-800 dark:text-slate-200">50 MB per file</strong>
+            </div>
+            <div className="flex justify-between font-medium">
+              <span>AI Models Included</span>
+              <strong className="text-slate-800 dark:text-slate-200">Gemini 3.6 Flash + Groq 120B Fallback</strong>
+            </div>
+            <div className="flex justify-between font-medium">
+              <span>Page Citations</span>
+              <strong className="text-slate-800 dark:text-slate-200">Grounded & Verified</strong>
+            </div>
+          </div>
+          <div className="flex justify-end pt-2">
+            <Button size="sm" onClick={() => setIsPlanModalOpen(false)}>
+              Close
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

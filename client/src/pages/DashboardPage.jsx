@@ -36,9 +36,10 @@ export function DashboardPage() {
     async function loadDashboardData() {
       try {
         setLoading(true);
+        const spaceParam = currentSpace?._id || currentSpace?.id ? `?spaceId=${currentSpace._id || currentSpace.id}` : '';
         const [docsRes, chatsRes, logsRes] = await Promise.all([
-          api.get('/documents'),
-          api.get('/chat/conversations'),
+          api.get(`/documents${spaceParam}`),
+          api.get(`/chat/conversations${spaceParam}`),
           api.get('/notes/activity')
         ]);
         setRecentDocs((docsRes.documents || []).slice(0, 4));
@@ -53,9 +54,10 @@ export function DashboardPage() {
     loadDashboardData();
   }, [currentSpace]);
 
-  const storageUsedMB = Math.round((user?.storageUsedBytes || 48 * 1024 * 1024) / (1024 * 1024));
+  const rawBytes = user?.storageUsedBytes || 0;
+  const storageUsedMB = (rawBytes / (1024 * 1024)).toFixed(1);
   const storageLimitMB = Math.round((user?.storageLimitBytes || 2 * 1024 * 1024 * 1024) / (1024 * 1024));
-  const storagePercent = Math.min(100, Math.round((storageUsedMB / (storageLimitMB || 1)) * 100));
+  const storagePercent = Math.min(100, Math.round((rawBytes / (user?.storageLimitBytes || 2 * 1024 * 1024 * 1024)) * 100));
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -160,41 +162,50 @@ export function DashboardPage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {spaces.map((space) => {
-                const isActive = (space._id || space.id) === (currentSpace?._id || currentSpace?.id);
-                return (
-                  <div
-                    key={space._id || space.id}
-                    onClick={() => {
-                      setCurrentSpace(space);
-                      navigate(`/app/spaces/${space._id || space.id}`);
-                    }}
-                    className={`p-3.5 rounded-xl border transition cursor-pointer text-left ${
-                      isActive
-                        ? 'border-brand-500 bg-brand-50/40 dark:bg-brand-950/20'
-                        : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50/50 dark:bg-slate-850/40'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="font-semibold text-xs text-slate-800 dark:text-slate-200 truncate max-w-[170px]">
-                        {space.name}
-                      </span>
-                      {isActive && (
-                        <Badge variant="brand" size="xs">Active</Badge>
-                      )}
+            {spaces.length === 0 ? (
+              <div className="text-center py-6 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+                <p className="text-xs text-slate-500 mb-2">No spaces created yet.</p>
+                <Button size="xs" variant="secondary" onClick={openCreateSpaceModal} icon={Plus}>
+                  Create Space
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {spaces.map((space) => {
+                  const isActive = (space._id || space.id) === (currentSpace?._id || currentSpace?.id);
+                  return (
+                    <div
+                      key={space._id || space.id}
+                      onClick={() => {
+                        setCurrentSpace(space);
+                        navigate(`/app/spaces/${space._id || space.id}`);
+                      }}
+                      className={`p-3.5 rounded-xl border transition cursor-pointer text-left ${
+                        isActive
+                          ? 'border-brand-500 bg-brand-50/40 dark:bg-brand-950/20'
+                          : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50/50 dark:bg-slate-850/40'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="font-semibold text-xs text-slate-800 dark:text-slate-200 truncate max-w-[170px]">
+                          {space.name}
+                        </span>
+                        {isActive && (
+                          <Badge variant="brand" size="xs">Active</Badge>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 mb-3">
+                        {space.description || 'No description provided.'}
+                      </p>
+                      <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800">
+                        <span>{space.documentCount || 0} documents</span>
+                        <span>{space.members?.length || 1} members</span>
+                      </div>
                     </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 mb-3">
-                      {space.description || 'No description provided.'}
-                    </p>
-                    <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800">
-                      <span>{space.documentCount || 0} documents</span>
-                      <span>{space.members?.length || 1} members</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Recent Documents Table/List */}
@@ -208,33 +219,42 @@ export function DashboardPage() {
               </Link>
             </div>
 
-            <div className="space-y-2">
-              {recentDocs.map((doc) => (
-                <div
-                  key={doc._id || doc.id}
-                  onClick={() => navigate(`/app/reader/${doc._id || doc.id}`)}
-                  className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition cursor-pointer flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-3 truncate">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950 text-indigo-600 flex items-center justify-center shrink-0">
-                      <FileText className="w-4 h-4" />
+            {recentDocs.length === 0 ? (
+              <div className="text-center py-6 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+                <p className="text-xs text-slate-500 mb-2">No documents indexed yet in this space.</p>
+                <Button size="xs" onClick={openUploadModal} icon={Upload}>
+                  Upload First Document
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {recentDocs.map((doc) => (
+                  <div
+                    key={doc._id || doc.id}
+                    onClick={() => navigate(`/app/reader/${doc._id || doc.id}`)}
+                    className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition cursor-pointer flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-3 truncate">
+                      <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950 text-indigo-600 flex items-center justify-center shrink-0">
+                        <FileText className="w-4 h-4" />
+                      </div>
+                      <div className="truncate">
+                        <div className="text-xs font-medium text-slate-800 dark:text-slate-200 truncate">
+                          {doc.title}
+                        </div>
+                        <div className="text-[11px] text-slate-400">
+                          {doc.pageCount} pages • {doc.fileType?.toUpperCase()} • {doc.complexity}
+                        </div>
+                      </div>
                     </div>
-                    <div className="truncate">
-                      <div className="text-xs font-medium text-slate-800 dark:text-slate-200 truncate">
-                        {doc.title}
-                      </div>
-                      <div className="text-[11px] text-slate-400">
-                        {doc.pageCount} pages • {doc.fileType?.toUpperCase()} • {doc.complexity}
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="success" size="xs">Ready</Badge>
+                      <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="success" size="xs">Ready</Badge>
-                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -284,18 +304,22 @@ export function DashboardPage() {
             <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
               Recent Workspace Activity
             </h3>
-            <div className="space-y-3">
-              {activityLogs.map((log) => (
-                <div key={log._id || log.id} className="text-xs space-y-0.5 border-b border-slate-100 dark:border-slate-800/60 pb-2.5 last:border-0 last:pb-0">
-                  <div className="font-medium text-slate-800 dark:text-slate-200">
-                    {log.details}
+            {activityLogs.length === 0 ? (
+              <p className="text-xs text-slate-400 text-center py-4">No recent activity recorded yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {activityLogs.map((log) => (
+                  <div key={log._id || log.id} className="text-xs space-y-0.5 border-b border-slate-100 dark:border-slate-800/60 pb-2.5 last:border-0 last:pb-0">
+                    <div className="font-medium text-slate-800 dark:text-slate-200">
+                      {log.details}
+                    </div>
+                    <div className="text-[10px] text-slate-400">
+                      By {log.userName} • {new Date(log.createdAt).toLocaleDateString()}
+                    </div>
                   </div>
-                  <div className="text-[10px] text-slate-400">
-                    By {log.userName} • {new Date(log.createdAt).toLocaleDateString()}
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

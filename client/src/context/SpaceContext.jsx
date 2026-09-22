@@ -17,11 +17,16 @@ export function SpaceProvider({ children }) {
       const res = await api.get('/spaces');
       if (res.success && res.spaces) {
         setSpaces(res.spaces);
-        // If no space is active or active space was deleted, select the first one
-        if (!currentSpace && res.spaces.length > 0) {
-          const savedSpaceId = localStorage.getItem('documind_active_space');
-          const matched = res.spaces.find(s => (s._id || s.id) === savedSpaceId);
+        if (res.spaces.length > 0) {
+          const currentId = currentSpace?._id || currentSpace?.id || localStorage.getItem('documind_active_space');
+          const matched = res.spaces.find(s => (s._id || s.id) === currentId);
           setCurrentSpace(matched || res.spaces[0]);
+          if (matched || res.spaces[0]) {
+            localStorage.setItem('documind_active_space', (matched || res.spaces[0])._id || (matched || res.spaces[0]).id);
+          }
+        } else {
+          setCurrentSpace(null);
+          localStorage.removeItem('documind_active_space');
         }
       }
     } catch (err) {

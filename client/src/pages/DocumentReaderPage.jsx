@@ -38,17 +38,23 @@ export function DocumentReaderPage() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('reader'); // For mobile: 'reader' | 'ai' | 'outline'
 
+  // Notification state
+  const [feedbackMsg, setFeedbackMsg] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
   const chatBottomRef = useRef(null);
 
   useEffect(() => {
     async function loadDocument() {
       try {
         setLoading(true);
+        setErrorMessage('');
         const res = await api.get(`/documents/${id}/pages`);
         setDoc(res.document);
         setPages(res.pages || []);
       } catch (err) {
         console.error('Failed to load document pages:', err);
+        setErrorMessage(err.message || 'This document could not be found or loaded.');
       } finally {
         setLoading(false);
       }
@@ -96,17 +102,19 @@ export function DocumentReaderPage() {
         selectedText: selectedText,
         pageNumber: currentPage
       });
-      alert('Passage saved to your Notes & Highlights!');
+      setFeedbackMsg('Passage saved to your Notes & Highlights.');
+      setTimeout(() => setFeedbackMsg(''), 3000);
       setSelectedText('');
       setSelectionPos(null);
     } catch (err) {
-      alert(err.message || 'Failed to save note');
+      setErrorMessage(err.message || 'Failed to save note.');
+      setTimeout(() => setErrorMessage(''), 3500);
     }
   };
 
   const sendMessage = async (customQuery = null, contextExcerpt = null) => {
     const textToSend = customQuery || inputQuery;
-    if (!textToSend || !textToSend.trim()) return;
+    if (!textToSend || !textToSend.trim() || isAiLoading) return;
 
     const userMsg = { role: 'user', content: textToSend };
     setMessages(prev => [...prev, userMsg]);
@@ -126,25 +134,60 @@ export function DocumentReaderPage() {
     } catch (err) {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'I could not process this document query. Please retry.'
+        content: 'I could not process this document query. Please check connection or retry.'
       }]);
     } finally {
       setIsAiLoading(false);
     }
   };
 
-  if (loading || !doc) {
+  if (loading) {
     return (
-      <div className="py-20 text-center text-xs text-slate-400">
-        Loading document reader...
+      <div className="py-24 text-center space-y-3">
+        <Sparkles className="w-6 h-6 text-brand-600 animate-spin mx-auto" />
+        <p className="text-xs text-slate-500">Loading document reader and parsing pages...</p>
+      </div>
+    );
+  }
+
+  if (!doc) {
+    return (
+      <div className="max-w-md mx-auto py-20 text-center space-y-4">
+        <BookOpen className="w-12 h-12 text-slate-400 mx-auto" />
+        <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
+          Document Not Found
+        </h2>
+        <p className="text-xs text-slate-500 leading-relaxed">
+          {errorMessage || 'The requested document does not exist, was removed, or you do not have permission to view it.'}
+        </p>
+        <Link to="/app/documents">
+          <Button size="sm" icon={ChevronLeft}>
+            Back to Documents
+          </Button>
+        </Link>
       </div>
     );
   }
 
   const activePageData = pages.find(p => p.pageNumber === currentPage) || pages[0] || { text: 'Empty page' };
 
+
   return (
-    <div className="h-[calc(100vh-5rem)] flex flex-col -m-4 sm:-m-6 lg:-m-8 overflow-hidden bg-slate-100 dark:bg-slate-950">
+    <div className="h-[calc(100vh-5rem)] flex flex-col -m-4 sm:-m-6 lg:-m-8 overflow-hidden bg-slate-100 dark:bg-slate-950 relative">
+      {/* Toast feedback */}
+      {feedbackMsg && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+          <Check className="w-3.5 h-3.5" />
+          <span>{feedbackMsg}</span>
+        </div>
+      )}
+      {errorMessage && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-semibold shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+          <ChevronLeft className="w-3.5 h-3.5" />
+          <span>{errorMessage}</span>
+        </div>
+      )}
+
       {/* Reader Control Header */}
       <div className="h-14 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">

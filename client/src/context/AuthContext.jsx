@@ -26,6 +26,12 @@ export function AuthProvider({ children }) {
       setLoading(false);
     }
     loadUser();
+
+    const handleAuthExpired = () => {
+      logout();
+    };
+    window.addEventListener('documind_auth_expired', handleAuthExpired);
+    return () => window.removeEventListener('documind_auth_expired', handleAuthExpired);
   }, [token]);
 
   const login = async (email, password) => {

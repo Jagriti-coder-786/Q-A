@@ -10,7 +10,7 @@ export function requireSpaceRole(minimumRole = 'viewer') {
 
   return async (req, res, next) => {
     try {
-      const spaceId = req.params.spaceId || req.body.spaceId || req.query.spaceId;
+      const spaceId = req.params.spaceId || req.params.id || req.body.spaceId || req.query.spaceId;
       if (!spaceId) {
         return res.status(400).json({ success: false, message: 'Space ID is required.' });
       }

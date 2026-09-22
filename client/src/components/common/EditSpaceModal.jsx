@@ -1,0 +1,134 @@
+import React, { useState, useEffect } from 'react';
+import { Modal } from './Modal.jsx';
+import { Button } from './Button.jsx';
+import api from '../../api/client.js';
+import { useSpace } from '../../context/SpaceContext.jsx';
+
+export function EditSpaceModal({ isOpen, onClose, space, onUpdated }) {
+  const { refreshSpaces } = useSpace();
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [tags, setTags] = useState('');
+  const [aiInstructions, setAiInstructions] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (space) {
+      setName(space.name || '');
+      setDescription(space.description || '');
+      setTags(Array.isArray(space.tags) ? space.tags.join(', ') : (space.tags || ''));
+      setAiInstructions(space.aiInstructions || '');
+      setError('');
+    }
+  }, [space, isOpen]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!name.trim()) {
+      setError('Space name is required.');
+      return;
+    }
+    if (!space) return;
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const tagArray = tags.split(',').map(t => t.trim()).filter(Boolean);
+      const res = await api.patch(`/spaces/${space._id || space.id}`, {
+        name: name.trim(),
+        description: description.trim(),
+        tags: tagArray,
+        aiInstructions: aiInstructions.trim()
+      });
+
+      if (res.success && res.space) {
+        await refreshSpaces();
+        if (onUpdated) onUpdated(res.space);
+        onClose();
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to update Knowledge Space.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={isLoading ? () => {} : onClose}
+      title="Edit Knowledge Space"
+      description="Update space metadata, categorization tags, and custom AI prompt instructions."
+      maxWidth="max-w-md"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+            Space Name *
+          </label>
+          <input
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+            Description
+          </label>
+          <textarea
+            rows={2}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none resize-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+            Tags (comma-separated)
+          </label>
+          <input
+            type="text"
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+            AI Space Prompt / Standing Directives
+          </label>
+          <textarea
+            rows={3}
+            value={aiInstructions}
+            onChange={(e) => setAiInstructions(e.target.value)}
+            placeholder="e.g. Prioritize concise answers citing exact page numbers."
+            className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none resize-none"
+          />
+        </div>
+
+        {error && (
+          <p className="text-xs text-rose-600 dark:text-rose-400">
+            {error}
+          </p>
+        )}
+
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <Button variant="secondary" size="sm" type="button" onClick={onClose} disabled={isLoading}>
+            Cancel
+          </Button>
+          <Button size="sm" type="submit" isLoading={isLoading}>
+            Save Changes
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
+}

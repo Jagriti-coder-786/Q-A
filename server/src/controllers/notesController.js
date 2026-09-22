@@ -19,20 +19,23 @@ export async function getNotes(req, res, next) {
 export async function createNote(req, res, next) {
   try {
     const { documentId, spaceId, title, content, pageNumber = 1, selectedText = '', color = 'yellow', tags = [] } = req.body;
-    if (!content || !spaceId || !documentId) {
-      return res.status(400).json({ success: false, message: 'Document ID, Space ID, and note content are required.' });
+    if (!content || !content.trim()) {
+      return res.status(400).json({ success: false, message: 'Note content is required.' });
+    }
+    if (!spaceId) {
+      return res.status(400).json({ success: false, message: 'Space ID is required.' });
     }
 
     const note = await Note.create({
-      documentId,
+      documentId: documentId || null,
       spaceId,
       userId: req.user._id || req.user.id,
-      title: title || 'Document Note',
+      title: (title && title.trim()) || 'Quick Note',
       content: content.trim(),
-      pageNumber,
-      selectedText,
-      color,
-      tags
+      pageNumber: pageNumber || 1,
+      selectedText: selectedText || '',
+      color: color || 'yellow',
+      tags: Array.isArray(tags) ? tags : []
     });
 
     await ActivityLog.create({
@@ -40,10 +43,33 @@ export async function createNote(req, res, next) {
       userId: req.user._id || req.user.id,
       userName: req.user.name,
       action: 'create_note',
-      details: `Added note on page ${pageNumber}.`
+      details: `Added note "${note.title}".`
     });
 
     res.status(201).json({ success: true, note });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updateNote(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { title, content, color, tags, pageNumber } = req.body;
+
+    const update = {};
+    if (title !== undefined) update.title = title.trim();
+    if (content !== undefined) update.content = content.trim();
+    if (color !== undefined) update.color = color;
+    if (tags !== undefined) update.tags = tags;
+    if (pageNumber !== undefined) update.pageNumber = pageNumber;
+
+    const updated = await Note.findByIdAndUpdate(id, update, { new: true });
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Note not found.' });
+    }
+
+    res.json({ success: true, note: updated });
   } catch (err) {
     next(err);
   }

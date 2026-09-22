@@ -217,22 +217,28 @@ ${isHinglish ? '- Respond in clear Hinglish.' : ''}`;
     return { answer: llmResult.text, citations, mode: 'study' };
   }
 
-  // Fallback
-  const studyContent = `### 📚 Study Pack: ${chunks[0].documentTitle}\n\n` +
+  // Dynamic Fallback grounded in actual document excerpt
+  const primaryDoc = chunks[0].documentTitle;
+  const primarySection = chunks[0].sectionTitle || 'General';
+  const sentences = chunks[0].content.split(/[.?!]/).map(s => s.trim()).filter(s => s.length > 20);
+  const coreDefinition = sentences[0] || chunks[0].excerpt;
+  const secondaryDetail = sentences[1] || `Verified details documented in ${primarySection}.`;
+
+  const studyContent = `### 📚 Study Pack: ${primaryDoc}\n\n` +
     `#### 1. Quick Revision Notes\n` +
-    `* **Core Concept:** ${chunks[0].sectionTitle} - ${chunks[0].excerpt}\n` +
-    `* **Key Definition:** As documented on Page ${chunks[0].pageNumber}, processes must maintain synchronization and avoid unsafe resource contention states.\n\n` +
+    `* **Core Concept (${primarySection}):** ${coreDefinition}.\n` +
+    `* **Key Definition:** As documented on Page ${chunks[0].pageNumber}, ${secondaryDetail}\n\n` +
     `#### 2. Practice MCQs\n` +
-    `**Q1. According to the document, what is the primary condition for ${chunks[0].sectionTitle}?**\n` +
-    `A) Random scheduling\n` +
-    `B) Mutual Exclusion, Hold and Wait, No Preemption, Circular Wait\n` +
-    `C) Unbounded buffer allocation\n` +
-    `D) None of the above\n` +
-    `*Correct Answer: B* — Verified from Page ${chunks[0].pageNumber}.\n\n` +
+    `**Q1. According to "${primaryDoc}" (Page ${chunks[0].pageNumber}), what is central to ${primarySection}?**\n` +
+    `A) ${coreDefinition}\n` +
+    `B) Operating without adherence to verified parameters\n` +
+    `C) Unvalidated state modifications\n` +
+    `D) Inconsistent execution across independent components\n\n` +
+    `*Correct Answer: A* — Verified directly from Section "${primarySection}" on Page ${chunks[0].pageNumber}.\n\n` +
     `#### 3. Important Exam Questions\n` +
-    `* **[2 Marks]:** Define the term '${chunks[0].sectionTitle}' with one example.\n` +
-    `* **[5 Marks]:** Explain the necessary conditions and recovery procedures with diagrams.\n` +
-    `* **[10 Marks]:** Critically analyze how modern operating systems prevent resource starvation.`;
+    `* **[2 Marks]:** Define the term '${primarySection}' as presented in ${primaryDoc}.\n` +
+    `* **[5 Marks]:** Explain the procedural framework and constraints detailed on Page ${chunks[0].pageNumber}.\n` +
+    `* **[10 Marks]:** Critically analyze the architectural and operational implications documented throughout this section.`;
 
   return { answer: studyContent, citations, mode: 'study' };
 }

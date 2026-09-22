@@ -149,3 +149,81 @@ export async function inviteMember(req, res, next) {
     next(err);
   }
 }
+
+export async function updateMemberRole(req, res, next) {
+  try {
+    const { id: spaceId, memberId } = req.params;
+    const { role } = req.body;
+
+    if (!role || !['viewer', 'editor', 'admin', 'owner'].includes(role)) {
+      return res.status(400).json({ success: false, message: 'Valid role is required (viewer, editor, admin, owner).' });
+    }
+
+    const space = await KnowledgeSpace.findById(spaceId);
+    if (!space) {
+      return res.status(404).json({ success: false, message: 'Knowledge space not found.' });
+    }
+
+    const members = space.members || [];
+    const member = members.find(m => m.userId === memberId || m.email === memberId || m._id === memberId);
+    if (!member) {
+      return res.status(404).json({ success: false, message: 'Member not found in this space.' });
+    }
+
+    if (member.role === 'owner' && space.ownerId === (member.userId || memberId) && role !== 'owner') {
+      return res.status(400).json({ success: false, message: 'Primary space owner role cannot be downgraded.' });
+    }
+
+    member.role = role;
+    const updated = await KnowledgeSpace.findByIdAndUpdate(spaceId, { members }, { new: true });
+
+    await ActivityLog.create({
+      spaceId,
+      userId: req.user._id || req.user.id,
+      userName: req.user.name,
+      action: 'update_role',
+      details: `Updated ${member.email || member.name} role to ${role}.`
+    });
+
+    res.json({ success: true, members: updated.members });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function removeMember(req, res, next) {
+  try {
+    const { id: spaceId, memberId } = req.params;
+    const space = await KnowledgeSpace.findById(spaceId);
+    if (!space) {
+      return res.status(404).json({ success: false, message: 'Knowledge space not found.' });
+    }
+
+    const members = space.members || [];
+    const targetIdx = members.findIndex(m => m.userId === memberId || m.email === memberId || m._id === memberId);
+    if (targetIdx === -1) {
+      return res.status(404).json({ success: false, message: 'Member not found in this space.' });
+    }
+
+    const targetMember = members[targetIdx];
+    if (targetMember.role === 'owner' || space.ownerId === (targetMember.userId || memberId)) {
+      return res.status(400).json({ success: false, message: 'Cannot remove the primary space owner.' });
+    }
+
+    members.splice(targetIdx, 1);
+    const updated = await KnowledgeSpace.findByIdAndUpdate(spaceId, { members }, { new: true });
+
+    await ActivityLog.create({
+      spaceId,
+      userId: req.user._id || req.user.id,
+      userName: req.user.name,
+      action: 'remove_member',
+      details: `Removed ${targetMember.email || targetMember.name} from space.`
+    });
+
+    res.json({ success: true, members: updated.members, message: 'Member removed successfully.' });
+  } catch (err) {
+    next(err);
+  }
+}
+

@@ -201,6 +201,49 @@ export async function deleteDocument(req, res, next) {
   }
 }
 
+export async function retryDocumentProcessing(req, res, next) {
+  try {
+    const docId = req.params.id;
+    const doc = await Document.findById(docId);
+    if (!doc) {
+      return res.status(404).json({ success: false, message: 'Document not found.' });
+    }
+
+    if (!doc.filePath || !fs.existsSync(doc.filePath)) {
+      return res.status(400).json({
+        success: false,
+        message: 'The original file was removed or is not available on disk. Please upload it again.'
+      });
+    }
+
+    const userId = req.user._id || req.user.id;
+    await Document.findByIdAndUpdate(docId, {
+      status: 'uploading',
+      processingProgress: 15,
+      errorMessage: null
+    });
+
+    // Re-run pipeline asynchronously
+    processIngestionPipeline(
+      docId,
+      doc.filePath,
+      doc.originalName || doc.title,
+      doc.fileType,
+      doc.spaceId,
+      userId
+    );
+
+    res.json({
+      success: true,
+      message: 'Ingestion pipeline restarted for this document.',
+      documentId: docId
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+
 export async function getDocumentPages(req, res, next) {
   try {
     const doc = await Document.findById(req.params.id);
