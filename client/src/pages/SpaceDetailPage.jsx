@@ -115,8 +115,8 @@ export function SpaceDetailPage() {
   if (loading) {
     return (
       <div className="py-24 text-center space-y-3">
-        <Sparkles className="w-6 h-6 text-brand-600 animate-spin mx-auto" />
-        <p className="text-xs text-slate-500">Loading knowledge space details...</p>
+        <Sparkles className="w-7 h-7 text-brand-400 animate-spin mx-auto" />
+        <p className="text-xs font-mono text-slate-400">Loading knowledge space details & documents...</p>
       </div>
     );
   }
@@ -124,11 +124,13 @@ export function SpaceDetailPage() {
   if (!space) {
     return (
       <div className="max-w-md mx-auto py-20 text-center space-y-4">
-        <FolderKanban className="w-12 h-12 text-slate-400 mx-auto" />
-        <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
+        <div className="w-12 h-12 rounded-2xl bg-midnight-surface border border-midnight-border flex items-center justify-center mx-auto text-slate-400">
+          <FolderKanban className="w-6 h-6" />
+        </div>
+        <h2 className="text-base font-display font-semibold text-slate-100">
           Knowledge Space Not Found
         </h2>
-        <p className="text-xs text-slate-500 leading-relaxed">
+        <p className="text-xs text-slate-400 leading-relaxed">
           {errorMessage || 'This space may have been deleted or you do not have permission to view it.'}
         </p>
         <Link to="/app/spaces">
@@ -143,40 +145,40 @@ export function SpaceDetailPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {errorMessage && (
-        <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 flex items-center justify-between text-xs text-rose-700 dark:text-rose-300">
+        <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-between text-xs text-rose-300">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
             <span>{errorMessage}</span>
           </div>
-          <button onClick={() => setErrorMessage('')} className="font-semibold underline ml-2">
+          <button onClick={() => setErrorMessage('')} className="font-semibold underline ml-2 hover:text-rose-200">
             Dismiss
           </button>
         </div>
       )}
 
       {/* Space Hero Banner */}
-      <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+      <div className="p-6 rounded-2xl border border-midnight-border bg-midnight-card shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-950/80 text-brand-600 flex items-center justify-center font-bold shrink-0 shadow-sm">
+          <div className="flex items-start gap-4">
+            <div className="w-11 h-11 rounded-xl bg-midnight-surface border border-midnight-border text-brand-300 flex items-center justify-center shrink-0 shadow-inner">
               <FolderKanban className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+              <div className="flex items-center gap-2.5">
+                <h1 className="text-xl font-display font-bold text-slate-100">
                   {space.name}
                 </h1>
-                <Badge variant="brand" size="xs">Active</Badge>
+                <Badge variant="cyan" size="xs">Active</Badge>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xl">
+              <p className="text-xs text-slate-400 mt-1 max-w-xl font-sans leading-relaxed">
                 {space.description || 'No description set.'}
               </p>
 
               {space.tags && space.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-2">
+                <div className="flex flex-wrap gap-1.5 mt-2.5">
                   {space.tags.map((t, idx) => (
-                    <span key={idx} className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium">
-                      {t}
+                    <span key={idx} className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-midnight-surface border border-midnight-border text-slate-400">
+                      #{t}
                     </span>
                   ))}
                 </div>
@@ -185,7 +187,7 @@ export function SpaceDetailPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Button size="sm" variant="outline" onClick={() => setIsEditOpen(true)} icon={Edit3}>
+            <Button size="sm" variant="secondary" onClick={() => setIsEditOpen(true)} icon={Edit3}>
               Edit Space
             </Button>
             <Button size="sm" variant="secondary" onClick={() => setIsInviteOpen(true)} icon={Users}>
@@ -202,11 +204,11 @@ export function SpaceDetailPage() {
 
         {/* AI Custom Prompt Banner */}
         {space.aiInstructions && (
-          <div className="mt-4 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-750 text-xs text-slate-700 dark:text-slate-300 flex items-start gap-2">
-            <Sparkles className="w-4 h-4 text-brand-600 shrink-0 mt-0.5" />
+          <div className="mt-5 p-3.5 rounded-xl bg-brand-500/5 border border-brand-500/20 text-xs text-brand-200 flex items-start gap-2.5">
+            <Sparkles className="w-4 h-4 text-brand-400 shrink-0 mt-0.5" />
             <div>
-              <span className="font-semibold text-slate-900 dark:text-slate-100">Space AI Directive: </span>
-              {space.aiInstructions}
+              <span className="font-semibold text-slate-200 font-mono text-[11px] uppercase tracking-wider block mb-0.5">Space AI Directive:</span>
+              <span className="text-slate-300 font-sans">{space.aiInstructions}</span>
             </div>
           </div>
         )}
@@ -217,19 +219,19 @@ export function SpaceDetailPage() {
         {/* Left (2/3): Documents in Space */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            <h2 className="text-sm font-display font-semibold text-slate-100">
               Documents in this Space ({documents.length})
             </h2>
             <Link to="/app/chat">
-              <Button size="sm" variant="outline" icon={MessageSquare}>
+              <Button size="sm" variant="secondary" icon={MessageSquare}>
                 Chat with this Space
               </Button>
             </Link>
           </div>
 
           {documents.length === 0 ? (
-            <div className="p-8 text-center rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-              <p className="text-xs text-slate-500 mb-3">
+            <div className="p-12 text-center rounded-2xl border border-dashed border-midnight-border bg-midnight-card/50 backdrop-blur-xs">
+              <p className="text-xs text-slate-400 mb-4">
                 No documents uploaded to this space yet.
               </p>
               <Button size="sm" onClick={openUploadModal} icon={Upload}>
@@ -242,38 +244,38 @@ export function SpaceDetailPage() {
                 <div
                   key={doc._id || doc.id}
                   onClick={() => navigate(`/app/reader/${doc._id || doc.id}`)}
-                  className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 transition cursor-pointer flex items-center justify-between"
+                  className="p-4 rounded-xl border border-midnight-border bg-midnight-card hover:border-brand-500/40 hover:bg-midnight-surface/80 transition-all duration-150 cursor-pointer flex items-center justify-between group shadow-sm"
                 >
-                  <div className="flex items-center gap-3 truncate">
-                    <div className="w-9 h-9 rounded-lg bg-indigo-50 dark:bg-indigo-950 text-indigo-600 flex items-center justify-center shrink-0">
+                  <div className="flex items-center gap-3.5 truncate">
+                    <div className="w-9 h-9 rounded-xl bg-midnight-surface border border-midnight-border text-brand-300 flex items-center justify-center shrink-0">
                       <FileText className="w-4 h-4" />
                     </div>
                     <div className="truncate">
-                      <div className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
+                      <div className="text-sm font-semibold text-slate-100 group-hover:text-brand-300 transition-colors truncate">
                         {doc.title}
                       </div>
-                      <div className="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
+                      <div className="text-xs font-mono text-slate-400 flex items-center gap-2 mt-0.5">
                         <span>{doc.pageCount || 1} pages</span>
-                        <span>•</span>
+                        <span className="text-slate-600">•</span>
                         <span>{doc.complexity || 'Intermediate'}</span>
-                        <span>•</span>
-                        <Badge variant="success" size="xs">READY</Badge>
+                        <span className="text-slate-600">•</span>
+                        <Badge variant="cyan" size="xs">READY</Badge>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         setDeleteDocId(doc._id || doc.id);
                       }}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 transition"
+                      className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
                       title="Delete document"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
-                    <ArrowRight className="w-4 h-4 text-slate-300 dark:text-slate-600" />
+                    <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all" />
                   </div>
                 </div>
               ))}
@@ -283,25 +285,25 @@ export function SpaceDetailPage() {
 
         {/* Right (1/3): Members & Space Metadata */}
         <div className="space-y-4">
-          <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-4">
+          <div className="p-6 rounded-2xl border border-midnight-border bg-midnight-card shadow-xl space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              <h3 className="text-sm font-display font-semibold text-slate-100">
                 Space Collaborators
               </h3>
               <button
                 onClick={() => setIsInviteOpen(true)}
-                className="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline"
+                className="text-xs font-semibold text-brand-400 hover:text-brand-300 transition"
               >
                 + Invite
               </button>
             </div>
 
-            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            <div className="divide-y divide-midnight-border/70">
               {space.members?.map((m, idx) => (
-                <div key={idx} className="py-2.5 flex items-center justify-between text-xs">
+                <div key={idx} className="py-3 flex items-center justify-between text-xs">
                   <div>
-                    <div className="font-medium text-slate-800 dark:text-slate-200">{m.name || m.email}</div>
-                    <div className="text-[10px] text-slate-400">{m.email}</div>
+                    <div className="font-semibold text-slate-200">{m.name || m.email}</div>
+                    <div className="text-[10px] font-mono text-slate-500">{m.email}</div>
                   </div>
                   <Badge variant={m.role === 'owner' ? 'brand' : 'neutral'} size="xs">
                     {m.role?.toUpperCase()}
@@ -330,7 +332,7 @@ export function SpaceDetailPage() {
       >
         <form onSubmit={handleInvite} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1.5 font-semibold">
               Email Address
             </label>
             <input
@@ -339,24 +341,24 @@ export function SpaceDetailPage() {
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
               placeholder="colleague@domain.com"
-              className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+              className="w-full text-xs rounded-xl border border-midnight-border bg-midnight-surface text-slate-100 placeholder-slate-500 px-3.5 py-2.5 focus:ring-1 focus:ring-brand-500 focus:outline-none transition shadow-inner"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-              Role
+            <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1.5 font-semibold">
+              Role Permission
             </label>
             <select
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value)}
-              className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+              className="w-full text-xs rounded-xl border border-midnight-border bg-midnight-surface text-slate-100 px-3.5 py-2.5 focus:ring-1 focus:ring-brand-500 focus:outline-none transition shadow-inner"
             >
-              <option value="editor">Editor (Upload, annotate, and chat)</option>
-              <option value="viewer">Viewer (Read-only)</option>
-              <option value="admin">Admin (Manage space and members)</option>
+              <option value="editor" className="bg-midnight-card">Editor (Upload, annotate, and chat)</option>
+              <option value="viewer" className="bg-midnight-card">Viewer (Read-only)</option>
+              <option value="admin" className="bg-midnight-card">Admin (Manage space and members)</option>
             </select>
           </div>
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-midnight-border">
             <Button variant="secondary" size="sm" type="button" onClick={() => setIsInviteOpen(false)}>
               Cancel
             </Button>

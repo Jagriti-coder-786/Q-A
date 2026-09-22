@@ -4,15 +4,58 @@
 
 @layer base {
   :root {
-    --brand-primary: #4F46E5;
-    --brand-primary-hover: #4338CA;
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F8FAFC;
+    --surface: #FFFFFF;
+    --surface-elevated: #F1F5F9;
+    --brand-primary: #6D5EF7;
+    --brand-highlight: #A78BFA;
+    --interactive-accent: #22D3EE;
+    --border-subtle: rgba(148, 163, 184, 0.2);
   }
+
+  .dark {
+    --bg-primary: #070A13;
+    --bg-secondary: #0A0F1C;
+    --surface: #0D1220;
+    --surface-elevated: #131A2A;
+    --brand-primary: #6D5EF7;
+    --brand-highlight: #A78BFA;
+    --interactive-accent: #22D3EE;
+    --border-subtle: rgba(148, 163, 184, 0.14);
+  }
+}
+
+/* Ambient Aurora Lighting utilities */
+.bg-aurora {
+  background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(109, 94, 247, 0.16) 0%, rgba(34, 211, 238, 0.05) 45%, transparent 75%);
+}
+
+.bg-aurora-subtle {
+  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(109, 94, 247, 0.09) 0%, transparent 70%);
+}
+
+.bg-aurora-accent {
+  background: radial-gradient(circle at 100% 0%, rgba(34, 211, 238, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 0% 100%, rgba(109, 94, 247, 0.1) 0%, transparent 50%);
+}
+
+/* Precision surface cards */
+.midnight-card {
+  background-color: #0D1220;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.midnight-card:hover {
+  border-color: rgba(148, 163, 184, 0.24);
+  background-color: #111728;
 }
 
 /* Sleek minimalist scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -20,29 +63,34 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.4);
+  background: rgba(148, 163, 184, 0.25);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.7);
+  background: rgba(148, 163, 184, 0.5);
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: rgba(71, 85, 105, 0.5);
+  background: rgba(148, 163, 184, 0.16);
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(71, 85, 105, 0.8);
+  background: rgba(109, 94, 247, 0.5);
 }
 
 /* Smooth text selection */
 ::selection {
-  background-color: #E0E7FF;
-  color: #312E81;
+  background-color: rgba(109, 94, 247, 0.3);
+  color: #F8FAFC;
 }
 
-.dark ::selection {
-  background-color: #312E81;
-  color: #E0E7FF;
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
+

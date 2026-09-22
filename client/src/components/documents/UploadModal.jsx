@@ -103,17 +103,17 @@ export function UploadModal({ isOpen, onClose, onUploadSuccess }) {
       <div className="space-y-4">
         {/* Space Selector */}
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+          <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1.5 font-semibold">
             Target Knowledge Space
           </label>
           <select
             value={selectedSpaceId}
             onChange={(e) => setSelectedSpaceId(e.target.value)}
             disabled={isUploading}
-            className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+            className="w-full text-xs rounded-xl border border-midnight-border bg-midnight-surface text-slate-100 px-3.5 py-2.5 focus:ring-1 focus:ring-brand-500 focus:outline-none transition shadow-inner"
           >
             {spaces.map(s => (
-              <option key={s._id || s.id} value={s._id || s.id}>
+              <option key={s._id || s.id} value={s._id || s.id} className="bg-midnight-card">
                 {s.name}
               </option>
             ))}
@@ -125,10 +125,10 @@ export function UploadModal({ isOpen, onClose, onUploadSuccess }) {
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleFileDrop}
           onClick={() => !isUploading && fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center ${
+          className={`border-2 border-dashed rounded-2xl p-7 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center ${
             isUploading
-              ? 'border-slate-300 bg-slate-50 dark:bg-slate-800/30 cursor-not-allowed'
-              : 'border-slate-300 dark:border-slate-700 hover:border-brand-500 dark:hover:border-brand-400 bg-slate-50/50 dark:bg-slate-800/20'
+              ? 'border-midnight-border bg-midnight-surface/30 cursor-not-allowed'
+              : 'border-midnight-border/80 hover:border-brand-500/60 hover:bg-midnight-surface/50 bg-midnight-surface/20 group'
           }`}
         >
           <input
@@ -140,34 +140,34 @@ export function UploadModal({ isOpen, onClose, onUploadSuccess }) {
             onChange={handleFileChange}
             disabled={isUploading}
           />
-          <div className="w-10 h-10 rounded-lg bg-brand-50 dark:bg-brand-950/60 text-brand-600 flex items-center justify-center mb-2">
+          <div className="w-11 h-11 rounded-xl bg-midnight-surface border border-midnight-border text-brand-400 group-hover:text-cyan-400 flex items-center justify-center mb-2.5 shadow-inner transition-colors">
             <Upload className="w-5 h-5" />
           </div>
-          <p className="text-xs font-medium text-slate-700 dark:text-slate-200">
-            Drag and drop documents here, or <span className="text-brand-600 dark:text-brand-400">browse files</span>
+          <p className="text-xs font-semibold text-slate-200">
+            Drag and drop documents here, or <span className="text-brand-400 group-hover:text-cyan-400 transition-colors">browse files</span>
           </p>
-          <p className="text-[11px] text-slate-400 mt-1">
-            Supports PDF, DOCX, CSV, XLSX, TXT, and Markdown (up to 50MB)
+          <p className="text-[11px] font-mono text-slate-500 mt-1">
+            PDF, DOCX, CSV, XLSX, TXT, MD (up to 50MB)
           </p>
         </div>
 
         {/* Selected Files List */}
         {files.length > 0 && (
-          <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+          <div className="space-y-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
             {files.map((file, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-750 text-xs"
+                className="flex items-center justify-between p-2.5 rounded-xl bg-midnight-surface border border-midnight-border text-xs"
               >
-                <div className="flex items-center gap-2 truncate">
-                  <FileText className="w-3.5 h-3.5 text-brand-600 shrink-0" />
-                  <span className="truncate text-slate-800 dark:text-slate-200">{file.name}</span>
-                  <span className="text-slate-400 shrink-0">({(file.size / 1024).toFixed(0)} KB)</span>
+                <div className="flex items-center gap-2.5 truncate">
+                  <FileText className="w-4 h-4 text-brand-400 shrink-0" />
+                  <span className="truncate text-slate-200 font-medium">{file.name}</span>
+                  <span className="text-slate-500 font-mono text-[10px] shrink-0">({(file.size / 1024).toFixed(0)} KB)</span>
                 </div>
                 {!isUploading && (
                   <button
                     onClick={() => removeFile(idx)}
-                    className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    className="p-1 text-slate-400 hover:text-rose-400 transition"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -179,21 +179,21 @@ export function UploadModal({ isOpen, onClose, onUploadSuccess }) {
 
         {/* Progress & Error Feedback */}
         {isUploading && (
-          <div className="p-3 rounded-lg bg-brand-50 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-800 flex items-center gap-2.5 text-xs text-brand-700 dark:text-brand-300">
-            <Loader2 className="w-4 h-4 animate-spin shrink-0" />
-            <span>{statusMessage}</span>
+          <div className="p-3.5 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center gap-2.5 text-xs text-brand-300">
+            <Loader2 className="w-4 h-4 animate-spin shrink-0 text-brand-400" />
+            <span className="font-mono">{statusMessage}</span>
           </div>
         )}
 
         {errorMessage && (
-          <div className="p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 flex items-center gap-2 text-xs text-rose-700 dark:text-rose-300">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center gap-2 text-xs text-rose-300">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-2 pt-2">
+        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-midnight-border">
           <Button
             variant="secondary"
             size="sm"

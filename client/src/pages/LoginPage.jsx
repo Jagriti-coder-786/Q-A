@@ -55,15 +55,15 @@ export function LoginPage() {
       <button
         type="button"
         onClick={fillDemoAccount}
-        className="w-full mb-4 py-2 px-3 rounded-lg border border-dashed border-brand-300 dark:border-brand-700 bg-brand-50/50 dark:bg-brand-950/30 text-brand-700 dark:text-brand-300 text-xs font-medium flex items-center justify-center gap-2 hover:bg-brand-100/50 transition"
+        className="w-full mb-4 py-2 px-3 rounded-xl border border-dashed border-[#6D5EF7]/40 bg-[#6D5EF7]/10 text-[#A78BFA] text-xs font-medium flex items-center justify-center gap-2 hover:bg-[#6D5EF7]/20 transition"
       >
-        <UserCheck className="w-3.5 h-3.5" />
+        <UserCheck className="w-3.5 h-3.5 text-[#22D3EE]" />
         <span>One-Click Demo Account (Alex Mercer)</span>
       </button>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+          <label className="block text-xs font-medium text-slate-700 dark:text-[#94A3B8] mb-1">
             Email Address
           </label>
           <input
@@ -72,16 +72,16 @@ export function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="alex.mercer@documind.ai"
-            className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-750 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2.5 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+            className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-[#131A2A] text-slate-900 dark:text-[#F8FAFC] px-3.5 py-2.5 focus:ring-1 focus:ring-[#6D5EF7] focus:border-[#6D5EF7] focus:outline-none placeholder-slate-400 dark:placeholder-slate-600 transition"
           />
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
+            <label className="block text-xs font-medium text-slate-700 dark:text-[#94A3B8]">
               Password
             </label>
-            <span className="text-[11px] text-brand-600 dark:text-brand-400 cursor-pointer hover:underline">
+            <span className="text-[11px] text-[#A78BFA] cursor-pointer hover:underline">
               Forgot password?
             </span>
           </div>
@@ -91,7 +91,7 @@ export function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-750 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2.5 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+            className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-[#131A2A] text-slate-900 dark:text-[#F8FAFC] px-3.5 py-2.5 focus:ring-1 focus:ring-[#6D5EF7] focus:border-[#6D5EF7] focus:outline-none placeholder-slate-400 dark:placeholder-slate-600 transition"
           />
         </div>
 
@@ -102,13 +102,13 @@ export function LoginPage() {
           className="w-full mt-2"
           icon={ArrowRight}
         >
-          Sign in
+          Sign in to Workspace
         </Button>
       </form>
 
-      <div className="mt-6 text-center text-xs text-slate-500">
+      <div className="mt-6 text-center text-xs text-slate-500 dark:text-[#64748B]">
         Don't have an account yet?{' '}
-        <Link to="/register" className="font-semibold text-brand-600 dark:text-brand-400 hover:underline">
+        <Link to="/register" className="font-semibold text-[#6D5EF7] dark:text-[#A78BFA] hover:underline">
           Sign up
         </Link>
       </div>

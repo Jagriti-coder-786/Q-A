@@ -54,7 +54,7 @@ export function RegisterPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+          <label className="block text-xs font-medium text-slate-700 dark:text-[#94A3B8] mb-1">
             Full Name
           </label>
           <input
@@ -63,12 +63,12 @@ export function RegisterPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Alex Mercer"
-            className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-750 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2.5 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+            className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-[#131A2A] text-slate-900 dark:text-[#F8FAFC] px-3.5 py-2.5 focus:ring-1 focus:ring-[#6D5EF7] focus:border-[#6D5EF7] focus:outline-none placeholder-slate-400 dark:placeholder-slate-600 transition"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+          <label className="block text-xs font-medium text-slate-700 dark:text-[#94A3B8] mb-1">
             Email Address
           </label>
           <input
@@ -77,12 +77,12 @@ export function RegisterPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="alex.mercer@example.com"
-            className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-750 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2.5 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+            className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-[#131A2A] text-slate-900 dark:text-[#F8FAFC] px-3.5 py-2.5 focus:ring-1 focus:ring-[#6D5EF7] focus:border-[#6D5EF7] focus:outline-none placeholder-slate-400 dark:placeholder-slate-600 transition"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+          <label className="block text-xs font-medium text-slate-700 dark:text-[#94A3B8] mb-1">
             Password (min 6 characters)
           </label>
           <input
@@ -91,7 +91,7 @@ export function RegisterPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-750 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2.5 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+            className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-[#131A2A] text-slate-900 dark:text-[#F8FAFC] px-3.5 py-2.5 focus:ring-1 focus:ring-[#6D5EF7] focus:border-[#6D5EF7] focus:outline-none placeholder-slate-400 dark:placeholder-slate-600 transition"
           />
         </div>
 
@@ -102,13 +102,13 @@ export function RegisterPage() {
           className="w-full mt-2"
           icon={ArrowRight}
         >
-          Create account
+          Create Knowledge Account
         </Button>
       </form>
 
-      <div className="mt-6 text-center text-xs text-slate-500">
+      <div className="mt-6 text-center text-xs text-slate-500 dark:text-[#64748B]">
         Already have an account?{' '}
-        <Link to="/login" className="font-semibold text-brand-600 dark:text-brand-400 hover:underline">
+        <Link to="/login" className="font-semibold text-[#6D5EF7] dark:text-[#A78BFA] hover:underline">
           Sign in
         </Link>
       </div>

@@ -57,7 +57,7 @@ export function CreateSpaceModal({ isOpen, onClose }) {
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+          <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1.5 font-semibold">
             Space Name *
           </label>
           <input
@@ -66,12 +66,12 @@ export function CreateSpaceModal({ isOpen, onClose }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Operating Systems Notes or Q3 Financials"
-            className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+            className="w-full text-xs rounded-xl border border-midnight-border bg-midnight-surface text-slate-100 placeholder-slate-500 px-3.5 py-2.5 focus:ring-1 focus:ring-brand-500 focus:outline-none transition shadow-inner"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+          <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1.5 font-semibold">
             Description
           </label>
           <textarea
@@ -79,12 +79,12 @@ export function CreateSpaceModal({ isOpen, onClose }) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="What is this space for?"
-            className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none resize-none"
+            className="w-full text-xs rounded-xl border border-midnight-border bg-midnight-surface text-slate-100 placeholder-slate-500 px-3.5 py-2.5 focus:ring-1 focus:ring-brand-500 focus:outline-none resize-none transition shadow-inner"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+          <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1.5 font-semibold">
             Tags (comma-separated)
           </label>
           <input
@@ -92,12 +92,12 @@ export function CreateSpaceModal({ isOpen, onClose }) {
             value={tags}
             onChange={(e) => setTags(e.target.value)}
             placeholder="Academic, Research, Exams"
-            className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+            className="w-full text-xs rounded-xl border border-midnight-border bg-midnight-surface text-slate-100 placeholder-slate-500 px-3.5 py-2.5 focus:ring-1 focus:ring-brand-500 focus:outline-none transition shadow-inner"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+          <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1.5 font-semibold">
             AI Space Prompt / Custom Instructions (Optional)
           </label>
           <textarea
@@ -105,17 +105,17 @@ export function CreateSpaceModal({ isOpen, onClose }) {
             value={aiInstructions}
             onChange={(e) => setAiInstructions(e.target.value)}
             placeholder="e.g. Always format answers as bulleted exam answers with page citations."
-            className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none resize-none"
+            className="w-full text-xs rounded-xl border border-midnight-border bg-midnight-surface text-slate-100 placeholder-slate-500 px-3.5 py-2.5 focus:ring-1 focus:ring-brand-500 focus:outline-none resize-none transition shadow-inner"
           />
         </div>
 
         {error && (
-          <p className="text-xs text-rose-600 dark:text-rose-400">
+          <p className="text-xs text-rose-400 font-mono">
             {error}
           </p>
         )}
 
-        <div className="flex items-center justify-end gap-2 pt-2">
+        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-midnight-border">
           <Button variant="secondary" size="sm" type="button" onClick={onClose} disabled={isLoading}>
             Cancel
           </Button>

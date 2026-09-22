@@ -92,11 +92,14 @@ export function StudyPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <GraduationCap className="w-5 h-5 text-brand-600" /> Study Mode
+          <h1 className="text-xl font-display font-bold tracking-tight text-slate-100 flex items-center gap-2.5">
+            <div className="p-1.5 rounded-lg bg-brand-500/10 border border-brand-500/30 text-brand-400">
+              <GraduationCap className="w-5 h-5" />
+            </div>
+            <span>Study Intelligence</span>
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Turn your lecture notes and syllabus into interactive flashcards, practice quizzes, and exam prep.
+          <p className="text-xs text-slate-400 mt-1">
+            Synthesize lecture notes, research, and papers into active-recall flashcards, verified quizzes, and revision guides.
           </p>
         </div>
 
@@ -106,10 +109,10 @@ export function StudyPage() {
             <select
               value={selectedDocId}
               onChange={(e) => setSelectedDocId(e.target.value)}
-              className="text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+              className="text-xs rounded-xl border border-midnight-border bg-midnight-surface text-slate-200 px-3 py-2 focus:ring-1 focus:ring-brand-500 focus:outline-none transition shadow-inner"
             >
               {documents.map((d) => (
-                <option key={d._id || d.id} value={d._id || d.id}>
+                <option key={d._id || d.id} value={d._id || d.id} className="bg-midnight-card text-slate-200">
                   {d.title}
                 </option>
               ))}
@@ -126,24 +129,26 @@ export function StudyPage() {
       </div>
 
       {errorMessage && (
-        <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 flex items-center justify-between text-xs text-rose-700 dark:text-rose-300">
+        <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-between text-xs text-rose-300">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
             <span>{errorMessage}</span>
           </div>
-          <button onClick={() => setErrorMessage('')} className="font-semibold underline ml-2">
+          <button onClick={() => setErrorMessage('')} className="font-semibold underline ml-2 hover:text-rose-200">
             Dismiss
           </button>
         </div>
       )}
 
       {documents.length === 0 && (
-        <div className="p-12 text-center rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <BookOpen className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-          <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+        <div className="p-14 text-center rounded-2xl border border-dashed border-midnight-border bg-midnight-card/50 backdrop-blur-xs">
+          <div className="w-12 h-12 rounded-2xl bg-midnight-surface border border-midnight-border flex items-center justify-center mx-auto mb-3 text-slate-500">
+            <BookOpen className="w-6 h-6" />
+          </div>
+          <h3 className="text-sm font-semibold text-slate-200">
             No documents in {currentSpace?.name || 'this space'}
           </h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4">
+          <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1 mb-5">
             Upload course notes, a syllabus, or research papers to start generating flashcards and quizzes.
           </p>
           <Button size="sm" onClick={openUploadModal} icon={Upload}>
@@ -153,16 +158,18 @@ export function StudyPage() {
       )}
 
       {!studyPack && !loading && documents.length > 0 && (
-        <div className="p-12 text-center rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <BookOpen className="w-10 h-10 text-brand-600 mx-auto mb-3" />
-          <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-            Ready to prepare for exams?
+        <div className="p-14 text-center rounded-2xl border border-dashed border-midnight-border bg-midnight-card/50 backdrop-blur-xs">
+          <div className="w-12 h-12 rounded-2xl bg-brand-500/10 border border-brand-500/30 flex items-center justify-center mx-auto mb-3 text-brand-400">
+            <Sparkles className="w-6 h-6" />
+          </div>
+          <h3 className="text-sm font-semibold text-slate-200">
+            Ready to generate exam prep?
           </h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4">
-            Select one of your uploaded study documents above and click "Generate Study Pack".
+          <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1 mb-5">
+            Select one of your indexed documents above and click "Generate Study Pack".
           </p>
           <Button size="sm" onClick={handleGenerate} icon={Sparkles}>
-            Generate from Current Document
+            Generate from Selected Document
           </Button>
         </div>
       )}
@@ -170,7 +177,7 @@ export function StudyPage() {
       {/* Tabs */}
       {studyPack && (
         <div className="space-y-6">
-          <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+          <div className="flex items-center gap-2 border-b border-midnight-border pb-3 overflow-x-auto">
             {[
               { id: 'flashcards', label: `Flashcards (${studyPack.flashcards?.length || 0})` },
               { id: 'mcqs', label: `Practice MCQs (${studyPack.mcqs?.length || 0})` },
@@ -180,10 +187,10 @@ export function StudyPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`text-xs px-3 py-1.5 rounded-lg font-medium transition ${
+                className={`text-xs px-3.5 py-1.5 rounded-xl font-medium transition-all duration-150 shrink-0 ${
                   activeTab === tab.id
-                    ? 'bg-brand-600 text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'bg-brand-500 text-white shadow-sm shadow-brand-500/25 ring-1 ring-brand-400/50'
+                    : 'bg-midnight-surface/80 border border-midnight-border text-slate-400 hover:text-slate-200 hover:border-slate-700'
                 }`}
               >
                 {tab.label}
@@ -196,35 +203,39 @@ export function StudyPage() {
             <div className="max-w-lg mx-auto space-y-4">
               <div
                 onClick={() => setIsFlipped(!isFlipped)}
-                className="h-64 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 flex flex-col justify-between cursor-pointer shadow-sm hover:shadow-md transition text-center select-none"
+                className="h-72 rounded-2xl border border-midnight-border bg-midnight-card p-8 flex flex-col justify-between cursor-pointer shadow-2xl hover:border-brand-500/40 transition-all duration-200 text-center select-none relative group"
               >
                 <div className="flex items-center justify-between text-xs text-slate-400">
-                  <span>Card {currentCardIdx + 1} of {studyPack.flashcards.length}</span>
-                  <Badge variant="brand" size="xs">
+                  <span className="font-mono text-[11px]">Card {currentCardIdx + 1} of {studyPack.flashcards.length}</span>
+                  <Badge variant="cyan" size="xs">
                     Page {studyPack.flashcards[currentCardIdx].pageNumber}
                   </Badge>
                 </div>
 
-                <div className="my-auto">
+                <div className="my-auto px-4">
                   {!isFlipped ? (
-                    <div className="space-y-2">
-                      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Concept</span>
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                    <div className="space-y-3">
+                      <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest">
+                        Concept / Question
+                      </span>
+                      <h3 className="text-xl font-display font-semibold text-slate-100 leading-snug">
                         {studyPack.flashcards[currentCardIdx].term}
                       </h3>
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      <span className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider">Definition</span>
-                      <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                    <div className="space-y-3">
+                      <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest flex items-center justify-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Definition / Answer
+                      </span>
+                      <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
                         {studyPack.flashcards[currentCardIdx].definition}
                       </p>
                     </div>
                   )}
                 </div>
 
-                <div className="text-[11px] text-slate-400 flex items-center justify-center gap-1">
-                  <RotateCw className="w-3.5 h-3.5" /> Click card to flip
+                <div className="text-[11px] text-slate-500 flex items-center justify-center gap-1.5 font-mono group-hover:text-slate-400 transition">
+                  <RotateCw className="w-3.5 h-3.5 text-brand-400" /> Click to flip
                 </div>
               </div>
 
@@ -241,7 +252,7 @@ export function StudyPage() {
                 >
                   Previous
                 </Button>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs font-mono text-slate-400">
                   {currentCardIdx + 1} / {studyPack.flashcards.length}
                 </span>
                 <Button
@@ -270,41 +281,41 @@ export function StudyPage() {
                 return (
                   <div
                     key={mcq.id || idx}
-                    className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-3"
+                    className="p-6 rounded-2xl border border-midnight-border bg-midnight-card shadow-lg space-y-4"
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <h3 className="font-semibold text-xs sm:text-sm text-slate-900 dark:text-slate-100">
+                      <h3 className="font-semibold text-xs sm:text-sm text-slate-100 leading-snug">
                         {idx + 1}. {mcq.question}
                       </h3>
-                      <Badge variant="neutral" size="xs">Page {mcq.pageNumber}</Badge>
+                      <Badge variant="cyan" size="xs">Page {mcq.pageNumber}</Badge>
                     </div>
 
-                    <div className="space-y-2 pt-1">
+                    <div className="space-y-2.5 pt-1">
                       {mcq.options.map((opt, optIdx) => {
-                        let btnStyle = 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300';
+                        let btnStyle = 'border-midnight-border bg-midnight-surface/70 hover:bg-midnight-surface hover:border-slate-700 text-slate-300';
 
                         if (showResults) {
                           if (optIdx === mcq.correctIndex) {
-                            btnStyle = 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200 font-semibold';
+                            btnStyle = 'border-emerald-500/60 bg-emerald-500/15 text-emerald-200 font-semibold ring-1 ring-emerald-500/30';
                           } else if (selectedOpt === optIdx) {
-                            btnStyle = 'border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-900 dark:text-rose-200';
+                            btnStyle = 'border-rose-500/60 bg-rose-500/15 text-rose-200 ring-1 ring-rose-500/30';
                           }
                         } else if (selectedOpt === optIdx) {
-                          btnStyle = 'border-brand-500 bg-brand-50 dark:bg-brand-950/60 text-brand-800 dark:text-brand-200 font-medium';
+                          btnStyle = 'border-brand-500/60 bg-brand-500/20 text-brand-200 font-medium ring-1 ring-brand-500/40';
                         }
 
                         return (
                           <button
                             key={optIdx}
                             onClick={() => handleSelectOption(mcq.id, optIdx)}
-                            className={`w-full text-left p-3 rounded-xl border text-xs transition flex items-center justify-between ${btnStyle}`}
+                            className={`w-full text-left p-3.5 rounded-xl border text-xs transition flex items-center justify-between ${btnStyle}`}
                           >
                             <span>{String.fromCharCode(65 + optIdx)}. {opt}</span>
                             {showResults && optIdx === mcq.correctIndex && (
-                              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                             )}
                             {showResults && selectedOpt === optIdx && optIdx !== mcq.correctIndex && (
-                              <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                              <XCircle className="w-4 h-4 text-rose-400 shrink-0" />
                             )}
                           </button>
                         );
@@ -312,8 +323,8 @@ export function StudyPage() {
                     </div>
 
                     {showResults && (
-                      <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-750 text-[11px] text-slate-600 dark:text-slate-300">
-                        <span className="font-bold text-slate-900 dark:text-slate-100">Explanation: </span>
+                      <div className="p-3.5 rounded-xl bg-midnight-surface/90 border border-midnight-border text-xs text-slate-300 leading-relaxed">
+                        <span className="font-semibold text-brand-300 block mb-0.5">Explanation:</span>
                         {mcq.explanation}
                       </div>
                     )}
@@ -321,13 +332,15 @@ export function StudyPage() {
                 );
               })}
 
-              <div className="flex items-center justify-between pt-4">
+              <div className="flex items-center justify-between pt-4 p-4 rounded-2xl bg-midnight-card border border-midnight-border">
                 {showResults ? (
-                  <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                    Your Score: {score} / {studyPack.mcqs.length} ({Math.round((score / studyPack.mcqs.length) * 100)}%)
+                  <div className="text-xs font-semibold text-slate-200 flex items-center gap-2">
+                    <span>Your Score:</span>
+                    <span className="text-cyan-400 font-mono text-sm">{score} / {studyPack.mcqs.length}</span>
+                    <span className="text-slate-500 font-mono">({Math.round((score / studyPack.mcqs.length) * 100)}%)</span>
                   </div>
                 ) : (
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs font-mono text-slate-400">
                     {Object.keys(selectedAnswers).length} of {studyPack.mcqs.length} answered
                   </span>
                 )}
@@ -348,19 +361,19 @@ export function StudyPage() {
               {studyPack.examQuestions.map((eq, idx) => (
                 <div
                   key={idx}
-                  className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-3"
+                  className="p-6 rounded-2xl border border-midnight-border bg-midnight-card shadow-lg space-y-3"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <Badge variant="brand" size="xs">[{eq.marks} Marks]</Badge>
-                      <Badge variant="neutral" size="xs">Page {eq.pageNumber}</Badge>
+                      <Badge variant="cyan" size="xs">Page {eq.pageNumber}</Badge>
                     </div>
                   </div>
-                  <h3 className="font-semibold text-xs sm:text-sm text-slate-900 dark:text-slate-100">
+                  <h3 className="font-semibold text-xs sm:text-sm text-slate-100">
                     {eq.question}
                   </h3>
-                  <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-750 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                    <span className="font-bold text-slate-800 dark:text-slate-200 block mb-1">
+                  <div className="p-4 rounded-xl bg-midnight-surface/90 border border-midnight-border text-xs text-slate-300 leading-relaxed">
+                    <span className="font-semibold text-slate-200 block mb-1">
                       Model Answer:
                     </span>
                     {eq.modelAnswer}
@@ -376,15 +389,15 @@ export function StudyPage() {
               {studyPack.revisionNotes.map((rn, idx) => (
                 <div
                   key={idx}
-                  className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-3"
+                  className="p-6 rounded-2xl border border-midnight-border bg-midnight-card shadow-lg space-y-3"
                 >
                   <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100">
+                    <h3 className="font-bold text-xs sm:text-sm text-slate-100">
                       {rn.title}
                     </h3>
-                    <Badge variant="neutral" size="xs">Page {rn.pageNumber}</Badge>
+                    <Badge variant="cyan" size="xs">Page {rn.pageNumber}</Badge>
                   </div>
-                  <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-400 list-disc list-inside">
+                  <ul className="space-y-2 text-xs text-slate-400 list-disc list-inside">
                     {rn.bullets?.map((b, bIdx) => (
                       <li key={bIdx} className="leading-relaxed">{b}</li>
                     ))}

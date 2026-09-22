@@ -18,6 +18,7 @@ import {
 import { Button } from '../components/common/Button.jsx';
 import { Badge } from '../components/common/Badge.jsx';
 import { ConfirmDialog } from '../components/common/ConfirmDialog.jsx';
+import { DocumentListSkeleton } from '../components/common/Skeleton.jsx';
 import { useSpace } from '../context/SpaceContext.jsx';
 import api from '../api/client.js';
 
@@ -173,34 +174,34 @@ export function DocumentsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3 flex-1 max-w-md">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search documents or topics..."
-              className="w-full text-xs pl-9 pr-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+              placeholder="Search documents by title, tags, or topic..."
+              className="w-full text-xs pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800/90 bg-white dark:bg-[#0D1220] text-slate-800 dark:text-[#F8FAFC] placeholder-slate-400 dark:placeholder-slate-500 focus:ring-1 focus:ring-[#6D5EF7] focus:outline-none transition shadow-2xs"
             />
           </div>
 
           {/* Scope Selector */}
-          <div className="flex items-center p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs shrink-0">
+          <div className="flex items-center p-0.5 rounded-xl border border-slate-200 dark:border-slate-800/90 bg-white dark:bg-[#0D1220] text-xs shrink-0 shadow-2xs">
             <button
               onClick={() => setScope('current')}
-              className={`px-2.5 py-1 rounded-md transition ${
+              className={`px-3 py-1.5 rounded-lg text-xs transition ${
                 scope === 'current'
-                  ? 'bg-brand-600 text-white font-medium shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  ? 'bg-[#6D5EF7] text-white font-medium shadow-xs'
+                  : 'text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-[#F8FAFC]'
               }`}
             >
               Current Space
             </button>
             <button
               onClick={() => setScope('all')}
-              className={`px-2.5 py-1 rounded-md transition ${
+              className={`px-3 py-1.5 rounded-lg text-xs transition ${
                 scope === 'all'
-                  ? 'bg-brand-600 text-white font-medium shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  ? 'bg-[#6D5EF7] text-white font-medium shadow-xs'
+                  : 'text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-[#F8FAFC]'
               }`}
             >
               All Spaces
@@ -214,10 +215,10 @@ export function DocumentsPage() {
             <button
               key={type}
               onClick={() => setSelectedType(type)}
-              className={`text-xs px-2.5 py-1.5 rounded-lg border transition ${
+              className={`text-xs px-3 py-1.5 rounded-xl border transition ${
                 selectedType === type
-                  ? 'bg-brand-50 dark:bg-brand-950/60 border-brand-300 dark:border-brand-700 text-brand-700 dark:text-brand-300 font-semibold'
-                  : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-[#6D5EF7]/15 dark:bg-[#6D5EF7]/20 border-[#6D5EF7]/40 text-[#6D5EF7] dark:text-[#A78BFA] font-semibold'
+                  : 'border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0D1220] text-slate-600 dark:text-[#94A3B8] hover:bg-slate-100 dark:hover:bg-[#131A2A]'
               }`}
             >
               {type.toUpperCase()}
@@ -226,15 +227,23 @@ export function DocumentsPage() {
         </div>
       </div>
 
-      {/* Documents Grid View */}
-      {filteredDocs.length === 0 ? (
-        <div className="p-12 text-center rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <p className="text-xs text-slate-500 mb-3">
-            {scope === 'current'
-              ? `No documents found in ${currentSpace?.name || 'this space'}.`
-              : 'No matching documents found.'}
-          </p>
-          <Button size="sm" onClick={openUploadModal} icon={Upload}>Upload Document</Button>
+      {/* Documents Grid View or Skeleton */}
+      {loading ? (
+        <DocumentListSkeleton count={6} />
+      ) : filteredDocs.length === 0 ? (
+        <div className="p-14 text-center rounded-2xl border border-dashed border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0D1220] shadow-2xs space-y-3">
+          <div className="w-12 h-12 rounded-2xl bg-[#6D5EF7]/10 text-[#A78BFA] flex items-center justify-center mx-auto">
+            <Files className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-[#F8FAFC]">Your knowledge base is empty</h3>
+            <p className="text-xs text-slate-500 dark:text-[#94A3B8] mt-1 max-w-sm mx-auto">
+              {scope === 'current'
+                ? `No documents have been indexed yet in ${currentSpace?.name || 'this space'}. Upload a PDF, Word doc, or CSV to begin.`
+                : 'No documents match your active search filter.'}
+            </p>
+          </div>
+          <Button size="sm" onClick={openUploadModal} icon={Upload}>Upload First Document</Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -245,11 +254,11 @@ export function DocumentsPage() {
             return (
               <div
                 key={doc._id || doc.id}
-                className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 transition flex flex-col justify-between"
+                className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0D1220] hover:border-slate-300 dark:hover:border-slate-700/80 transition flex flex-col justify-between shadow-2xs group"
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950 text-indigo-600 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-xl bg-[#6D5EF7]/10 text-[#A78BFA] flex items-center justify-center">
                       <FileText className="w-4 h-4" />
                     </div>
                     {getStatusBadge(doc)}
@@ -259,22 +268,22 @@ export function DocumentsPage() {
                     onClick={() => {
                       if (!isFailed) navigate(`/app/reader/${doc._id || doc.id}`);
                     }}
-                    className={`font-semibold text-sm text-slate-900 dark:text-slate-100 mb-1 line-clamp-1 ${
-                      isFailed ? 'cursor-not-allowed opacity-80' : 'hover:text-brand-600 dark:hover:text-brand-400 cursor-pointer'
+                    className={`font-semibold text-sm text-slate-900 dark:text-[#F8FAFC] mb-1 line-clamp-1 ${
+                      isFailed ? 'cursor-not-allowed opacity-80' : 'hover:text-[#6D5EF7] dark:hover:text-[#A78BFA] cursor-pointer'
                     }`}
                   >
                     {doc.title}
                   </h3>
 
                   {isProcessing && (
-                    <div className="my-2 space-y-1">
-                      <div className="flex items-center justify-between text-[11px] text-brand-600 dark:text-brand-400 font-medium">
-                        <span>{doc.status?.toUpperCase()}...</span>
+                    <div className="my-2.5 space-y-1">
+                      <div className="flex items-center justify-between text-[11px] text-[#A78BFA] font-medium">
+                        <span className="capitalize">{doc.status}...</span>
                         <span>{doc.processingProgress || 45}%</span>
                       </div>
-                      <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-slate-100 dark:bg-[#131A2A] rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-brand-600 rounded-full transition-all duration-300"
+                          className="h-full bg-gradient-to-r from-[#6D5EF7] to-[#22D3EE] rounded-full transition-all duration-300"
                           style={{ width: `${doc.processingProgress || 45}%` }}
                         />
                       </div>
@@ -282,7 +291,7 @@ export function DocumentsPage() {
                   )}
 
                   {isFailed ? (
-                    <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 text-[11px] text-rose-700 dark:text-rose-300 mb-3 space-y-2">
+                    <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 text-[11px] text-rose-700 dark:text-rose-300 mb-3 space-y-2">
                       <p>{doc.errorMessage || 'Parsing pipeline encountered an unexpected error.'}</p>
                       <button
                         onClick={(e) => handleRetry(e, doc._id || doc.id)}
@@ -294,13 +303,13 @@ export function DocumentsPage() {
                       </button>
                     </div>
                   ) : (
-                    <p className="text-xs text-slate-500 line-clamp-2 mb-3">
+                    <p className="text-xs text-slate-500 dark:text-[#94A3B8] line-clamp-2 mb-3 leading-relaxed">
                       {doc.summary || 'Document indexed and ready for grounded retrieval.'}
                     </p>
                   )}
 
                   {/* Document Metadata Badges */}
-                  <div className="flex items-center gap-2 text-[11px] text-slate-400 mb-4">
+                  <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-[#64748B] mb-4 font-mono">
                     <span>{doc.pageCount || 1} {doc.pageCount === 1 ? 'page' : 'pages'}</span>
                     <span>•</span>
                     <span>{doc.readingTimeMinutes || 1} min read</span>
@@ -310,15 +319,15 @@ export function DocumentsPage() {
                 </div>
 
                 {/* Action Toolbar */}
-                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800/70 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => navigate(`/app/reader/${doc._id || doc.id}`)}
                       disabled={isFailed}
-                      className={`p-1.5 rounded-md transition text-xs flex items-center gap-1 font-medium ${
+                      className={`px-2 py-1 rounded-lg transition text-xs flex items-center gap-1.5 font-medium ${
                         isFailed
                           ? 'opacity-40 cursor-not-allowed text-slate-400'
-                          : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300'
+                          : 'hover:bg-slate-100 dark:hover:bg-[#131A2A] text-slate-600 dark:text-[#94A3B8] hover:text-[#6D5EF7] dark:hover:text-[#F8FAFC]'
                       }`}
                       title="Open in Document Reader"
                     >
@@ -327,10 +336,10 @@ export function DocumentsPage() {
                     <button
                       onClick={() => navigate(`/app/analytics?docId=${doc._id || doc.id}`)}
                       disabled={isFailed}
-                      className={`p-1.5 rounded-md transition text-xs flex items-center gap-1 font-medium ${
+                      className={`px-2 py-1 rounded-lg transition text-xs flex items-center gap-1.5 font-medium ${
                         isFailed
                           ? 'opacity-40 cursor-not-allowed text-slate-400'
-                          : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300'
+                          : 'hover:bg-slate-100 dark:hover:bg-[#131A2A] text-slate-600 dark:text-[#94A3B8] hover:text-[#22D3EE]'
                       }`}
                       title="View Analytics"
                     >
@@ -340,7 +349,7 @@ export function DocumentsPage() {
 
                   <button
                     onClick={() => setDeleteDocId(doc._id || doc.id)}
-                    className="p-1.5 rounded-md hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-400 hover:text-rose-600 transition"
+                    className="p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-400 hover:text-rose-600 transition"
                     title="Delete Document"
                   >
                     <Trash2 className="w-3.5 h-3.5" />

@@ -69,10 +69,13 @@ export function SpacesPage() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <FolderKanban className="w-5 h-5 text-brand-600" /> Knowledge Spaces
+          <h1 className="text-xl font-display font-bold tracking-tight text-slate-100 flex items-center gap-2.5">
+            <div className="p-1.5 rounded-lg bg-brand-500/10 border border-brand-500/30 text-brand-400">
+              <FolderKanban className="w-5 h-5" />
+            </div>
+            <span>Knowledge Spaces</span>
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-400 mt-1">
             Organize documents, conversations, study materials, and permissions by subject or project.
           </p>
         </div>
@@ -82,12 +85,12 @@ export function SpacesPage() {
       </div>
 
       {errorMessage && (
-        <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 flex items-center justify-between text-xs text-rose-700 dark:text-rose-300">
+        <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-between text-xs text-rose-300">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
             <span>{errorMessage}</span>
           </div>
-          <button onClick={() => setErrorMessage('')} className="font-semibold underline ml-2">
+          <button onClick={() => setErrorMessage('')} className="font-semibold underline ml-2 hover:text-rose-200">
             Dismiss
           </button>
         </div>
@@ -96,19 +99,19 @@ export function SpacesPage() {
       {/* Filter and Search Bar */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search spaces by name, description, or tag..."
-            className="w-full text-xs pl-9 pr-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+            className="w-full text-xs pl-10 pr-3.5 py-2.5 rounded-xl border border-midnight-border bg-midnight-surface text-slate-100 placeholder-slate-500 focus:ring-1 focus:ring-brand-500 focus:outline-none transition shadow-inner"
           />
         </div>
       </div>
 
       {/* Spaces Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {filteredSpaces.map((space) => {
           const isSelected = (space._id || space.id) === (currentSpace?._id || currentSpace?.id);
           return (
@@ -118,29 +121,29 @@ export function SpacesPage() {
                 setCurrentSpace(space);
                 navigate(`/app/spaces/${space._id || space.id}`);
               }}
-              className={`p-5 rounded-2xl border transition cursor-pointer flex flex-col justify-between ${
+              className={`p-6 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between group ${
                 isSelected
-                  ? 'border-brand-500 bg-white dark:bg-slate-900 shadow-sm'
-                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700'
+                  ? 'border-brand-500/50 bg-midnight-card shadow-lg shadow-brand-500/10 ring-1 ring-brand-500/30'
+                  : 'border-midnight-border bg-midnight-card hover:border-slate-700 hover:bg-midnight-card/90 shadow-md'
               }`}
             >
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950 text-indigo-600 flex items-center justify-center font-bold">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-9 h-9 rounded-xl bg-midnight-surface border border-midnight-border text-brand-300 flex items-center justify-center shadow-inner">
                     <FolderKanban className="w-4 h-4" />
                   </div>
                   <div className="flex items-center gap-1.5">
-                    {isSelected && <Badge variant="brand" size="xs">Active</Badge>}
+                    {isSelected && <Badge variant="cyan" size="xs">Active</Badge>}
                     <button
                       onClick={(e) => handleOpenEdit(e, space)}
-                      className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-midnight-surface transition"
                       title="Edit Space Settings"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={(e) => handleOpenDelete(e, space._id || space.id)}
-                      className="p-1 rounded text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition"
                       title="Delete Space"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -148,22 +151,22 @@ export function SpacesPage() {
                   </div>
                 </div>
 
-                <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 mb-1">
+                <h3 className="font-display font-semibold text-base text-slate-100 mb-1.5 group-hover:text-brand-300 transition-colors">
                   {space.name}
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-4">
+                <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-4 font-sans">
                   {space.description || 'No description provided.'}
                 </p>
 
                 {/* Space tags */}
                 {space.tags && space.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-4">
+                  <div className="flex flex-wrap gap-1.5 mb-4">
                     {space.tags.slice(0, 3).map((tag, tIdx) => (
                       <span
                         key={tIdx}
-                        className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium"
+                        className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-midnight-surface border border-midnight-border text-slate-400"
                       >
-                        {tag}
+                        #{tag}
                       </span>
                     ))}
                   </div>
@@ -171,16 +174,16 @@ export function SpacesPage() {
               </div>
 
               {/* Space Footer Metric Bar */}
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400">
+              <div className="pt-3.5 border-t border-midnight-border flex items-center justify-between text-xs text-slate-400 font-mono">
                 <div className="flex items-center gap-3">
-                  <span className="flex items-center gap-1">
-                    <FileText className="w-3.5 h-3.5" /> {space.documentCount || 0} docs
+                  <span className="flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-slate-500" /> {space.documentCount || 0} docs
                   </span>
-                  <span className="flex items-center gap-1">
-                    <Users className="w-3.5 h-3.5" /> {space.members?.length || 1}
+                  <span className="flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-slate-500" /> {space.members?.length || 1}
                   </span>
                 </div>
-                <ArrowRight className="w-4 h-4 text-slate-300 dark:text-slate-600" />
+                <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all" />
               </div>
             </div>
           );

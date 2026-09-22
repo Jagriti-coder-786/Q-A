@@ -126,20 +126,20 @@ export function VoiceModal({ isOpen, onClose }) {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setLanguage('en-US')}
-            className={`text-xs px-2.5 py-1 rounded-full border transition ${
+            className={`text-xs px-3 py-1 rounded-full border transition-all duration-150 ${
               language === 'en-US'
-                ? 'bg-brand-50 dark:bg-brand-950 border-brand-300 dark:border-brand-700 text-brand-700 dark:text-brand-300 font-medium'
-                : 'border-slate-200 dark:border-slate-700 text-slate-500'
+                ? 'bg-brand-500/20 border-brand-500/40 text-brand-300 font-medium shadow-xs shadow-brand-500/20'
+                : 'border-midnight-border bg-midnight-surface text-slate-400 hover:text-slate-200'
             }`}
           >
             English
           </button>
           <button
             onClick={() => setLanguage('hi-IN')}
-            className={`text-xs px-2.5 py-1 rounded-full border transition ${
+            className={`text-xs px-3 py-1 rounded-full border transition-all duration-150 ${
               language === 'hi-IN'
-                ? 'bg-brand-50 dark:bg-brand-950 border-brand-300 dark:border-brand-700 text-brand-700 dark:text-brand-300 font-medium'
-                : 'border-slate-200 dark:border-slate-700 text-slate-500'
+                ? 'bg-brand-500/20 border-brand-500/40 text-brand-300 font-medium shadow-xs shadow-brand-500/20'
+                : 'border-midnight-border bg-midnight-surface text-slate-400 hover:text-slate-200'
             }`}
           >
             Hindi / Hinglish
@@ -147,30 +147,34 @@ export function VoiceModal({ isOpen, onClose }) {
         </div>
 
         {/* Microphone Pulse Circle */}
-        <div className="relative my-2">
+        <div className="relative my-3">
           {isListening && (
-            <div className="absolute inset-0 rounded-full bg-brand-500/20 animate-ping" />
+            <div className="absolute -inset-3 rounded-full bg-rose-500/20 animate-ping" />
           )}
           <button
             onClick={toggleListening}
-            className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg ${
+            className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all duration-200 shadow-xl ${
               isListening
-                ? 'bg-rose-600 text-white ring-4 ring-rose-300/40'
-                : 'bg-brand-600 hover:bg-brand-700 text-white'
+                ? 'bg-rose-500 text-white ring-4 ring-rose-400/40 shadow-rose-500/30'
+                : 'bg-gradient-to-tr from-brand-600 to-indigo-500 hover:from-brand-500 hover:to-indigo-400 text-white shadow-brand-500/30 ring-4 ring-brand-500/20'
             }`}
           >
             {isListening ? <MicOff className="w-8 h-8" /> : <Mic className="w-8 h-8" />}
           </button>
         </div>
 
-        <p className="text-xs text-slate-500 dark:text-slate-400">
+        <p className="text-xs text-slate-400 font-sans">
           {isListening ? 'Listening to your question... Tap to finish' : 'Tap the microphone and speak your query'}
         </p>
 
         {/* Live Transcript Box */}
-        <div className="w-full min-h-[70px] max-h-28 overflow-y-auto p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-750 text-left text-xs">
-          <span className="font-semibold text-slate-400 block mb-1">Your Query:</span>
-          {transcript || <span className="text-slate-400 italic">"Explain deadlock according to my notes" or "Is document ka simple explanation do"</span>}
+        <div className="w-full min-h-[70px] max-h-28 overflow-y-auto p-3.5 rounded-xl bg-midnight-surface border border-midnight-border text-left text-xs shadow-inner custom-scrollbar">
+          <span className="font-mono text-[10px] uppercase font-bold text-slate-500 block mb-1">Your Query:</span>
+          {transcript ? (
+            <span className="text-slate-200 font-medium font-sans">{transcript}</span>
+          ) : (
+            <span className="text-slate-500 italic">"Explain deadlock according to my notes" or "Is document ka simple explanation do"</span>
+          )}
         </div>
 
         {transcript && !isListening && (
@@ -187,22 +191,22 @@ export function VoiceModal({ isOpen, onClose }) {
 
         {/* Answer Box */}
         {response && (
-          <div className="w-full text-left p-3 rounded-lg bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 text-xs space-y-2 max-h-48 overflow-y-auto">
+          <div className="w-full text-left p-4 rounded-xl bg-midnight-surface/90 border border-midnight-border text-xs space-y-2 max-h-48 overflow-y-auto custom-scrollbar shadow-lg">
             <div className="flex items-center justify-between">
-              <span className="font-semibold text-brand-600 dark:text-brand-400">Grounded Answer:</span>
-              <div className="flex items-center gap-1">
+              <span className="font-semibold text-brand-300 font-mono text-[11px] uppercase tracking-wider">Grounded Answer:</span>
+              <div className="flex items-center gap-1.5">
                 {isSpeaking ? (
-                  <button onClick={stopSpeaking} className="p-1 text-slate-500 hover:text-slate-700" title="Stop speaking">
+                  <button onClick={stopSpeaking} className="p-1 rounded-md text-slate-400 hover:text-slate-200 hover:bg-midnight-card transition" title="Stop speaking">
                     <Square className="w-3.5 h-3.5" />
                   </button>
                 ) : (
-                  <button onClick={() => speakAnswer(response)} className="p-1 text-slate-500 hover:text-slate-700" title="Play audio">
+                  <button onClick={() => speakAnswer(response)} className="p-1 rounded-md text-slate-400 hover:text-slate-200 hover:bg-midnight-card transition" title="Play audio">
                     <Volume2 className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
             </div>
-            <p className="text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed">
+            <p className="text-slate-200 whitespace-pre-line leading-relaxed font-sans">
               {response}
             </p>
           </div>
